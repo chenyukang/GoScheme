@@ -43,16 +43,34 @@ type FixNum struct {
         value   int64
 }
 
+type Character struct {
+	objType ObjType
+	value   byte
+}
+
+type Pair struct {
+	objType ObjType
+	car     Object
+	cdr     Object
+}
+
+type Proc struct {
+	objType ObjType
+}
 
 var Symbol_Table   map[string]Object
-var The_Empty_List Object;
-var Set_Symbol     Object;
-var OK_Symbol      Object;
-var If_Symbol      Object;
-var Begin_Symbol   Object;
+var The_Empty_List Object
+var Set_Symbol     Object
+var OK_Symbol      Object
+var If_Symbol      Object
+var Begin_Symbol   Object
+var Let_Symbol     Object
+var And_Symbol     Object
+var Eof_Symbol     Object
+var The_Empty_Env  Object
+var The_Global_Env Object
 
-
-func Make_Symbol(sym string) Object {
+func MakeSymbol(sym string) Object {
 	if res, ok := Symbol_Table[sym]; ok {
 		return res
 	}
@@ -69,20 +87,38 @@ func IsEmptyList(obj Object) bool {
 	}
 }
 
+func Cons(car Object, cdr Object) Object {
+	res := &Pair{PAIR, car, cdr}
+	return (Object)(res)
+}
+
+func IsPair(obj Object) bool {
+	if _, ok := obj.(*Pair); ok {
+		return true
+	} else {
+		return false
+	}
+}
+
 func Init() {
 	Symbol_Table = make(map[string]Object)
 	The_Empty_List = &EmptyList { EMPTY_LIST }
-	Set_Symbol = Make_Symbol("set")
-	OK_Symbol = Make_Symbol("ok")
-	If_Symbol = Make_Symbol("if")
-	Begin_Symbol = Make_Symbol("begin")
+	Set_Symbol = MakeSymbol("set")
+	OK_Symbol = MakeSymbol("ok")
+	If_Symbol = MakeSymbol("if")
+	Begin_Symbol = MakeSymbol("begin")
 }
 
 func main() {
+	var a byte = 'a'
+	fmt.Println("byte:", a)
 	fmt.Println("Welcome to GoScheme.\nUse Ctrl-C to exit.")
 	Init()
 	fmt.Printf("now val: %d\n", The_Empty_List)
 	fmt.Println("time:", time.Now())
 	fmt.Println(IsEmptyList(The_Empty_List))
 	fmt.Println(IsEmptyList(OK_Symbol))
+	res := Cons(OK_Symbol, If_Symbol)
+	fmt.Println("res:", res)
+	fmt.Println(IsPair(res))
 }
