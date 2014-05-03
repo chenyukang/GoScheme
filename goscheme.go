@@ -6,6 +6,7 @@ import (
 )
 
 type Object interface {}
+type Value  interface {}
 
 type ObjType int
 const (
@@ -23,49 +24,54 @@ const (
 	EOF_OBJECT
 )
 
-type Object struct {
-	objType ObjType
+type EmptyList struct {
+        objType ObjType
 }
 
 type Boolean struct {
-	Object
+        objType ObjType
 	value int
 }
 
 type Symbol struct {
-	Object
-	value string
+        objType ObjType
+        value string
 }
 
 type FixNum struct {
-	Object
-	value   int64
+        objType ObjType
+        value   int64
 }
 
-var Symbol_Table   map[string]*Symbol
-var The_Empty_List *Object;
-var Set_Symbol     *Symbol;
-var OK_Symbol      *Symbol;
-var If_Symbol      *Symbol;
-var Begin_Symbol   *Symbol;
 
-func Alloc_Object() *Object {
-	obj := &Object{ objType: EMPTY_LIST }
-	return obj
-}
+var Symbol_Table   map[string]Object
+var The_Empty_List Object;
+var Set_Symbol     Object;
+var OK_Symbol      Object;
+var If_Symbol      Object;
+var Begin_Symbol   Object;
 
-func Make_Symbol(sym string) *Symbol {
+
+func Make_Symbol(sym string) Object {
 	if res, ok := Symbol_Table[sym]; ok {
 		return res
 	}
-	obj := &Symbol{ Object{STRING}, sym}
-	Symbol_Table[sym] = obj
+	obj := &Symbol{ STRING, sym}
+	Symbol_Table[sym] = (Object)(obj)
 	return obj
 }
 
+func IsEmptyList(obj Object) bool {
+	if obj == The_Empty_List {
+		return true
+	} else {
+		return false
+	}
+}
+
 func Init() {
-	Symbol_Table = make(map[string]*Symbol)
-	The_Empty_List = Alloc_Object()
+	Symbol_Table = make(map[string]Object)
+	The_Empty_List = &EmptyList { EMPTY_LIST }
 	Set_Symbol = Make_Symbol("set")
 	OK_Symbol = Make_Symbol("ok")
 	If_Symbol = Make_Symbol("if")
@@ -77,8 +83,6 @@ func main() {
 	Init()
 	fmt.Printf("now val: %d\n", The_Empty_List)
 	fmt.Println("time:", time.Now())
-	a := Alloc_Object()
-	b := Alloc_Object()
-	fmt.Println("a:", a)
-	fmt.Println("b:", b)
+	fmt.Println(IsEmptyList(The_Empty_List))
+	fmt.Println(IsEmptyList(OK_Symbol))
 }
