@@ -20,7 +20,7 @@ const (
 
 type ObjData struct {
 	boolean int
-	strVal  string
+	str     string
 	symbol  string
 	fixNum  int
 	char    byte
@@ -79,8 +79,33 @@ func makeBoolean(val int) *Object {
 	return obj
 }
 
+func makeFixNum(val int) *Object {
+	obj := allocObject()
+	obj.Type = FIXNUM
+	obj.Data.fixNum = val
+	return obj
+}
+
+func makeChar(char byte) *Object {
+	obj := allocObject()
+	obj.Type = CHARACTER
+	obj.Data.char = char
+	return obj
+}
+
+func makeString(str string) *Object {
+	obj := allocObject()
+	obj.Type = STRING
+	obj.Data.str = str
+	return obj
+}
+
 func isSymbol(obj *Object) bool {
 	return obj.Type == SYMBOL
+}
+
+func isString(obj *Object) bool {
+	return obj.Type == STRING
 }
 
 func isBoolean(obj *Object) bool {
@@ -95,8 +120,16 @@ func isTrue(obj *Object) bool {
 	return !isFalse(obj)
 }
 
+func isChar(obj *Object) bool {
+	return obj.Type == CHARACTER
+}
+
 func isEmptyList(obj *Object) bool {
 	return obj.Type == EMPTY_LIST
+}
+
+func isFixNum(obj *Object) bool {
+	return obj.Type == FIXNUM
 }
 
 func isPair(obj *Object) bool {

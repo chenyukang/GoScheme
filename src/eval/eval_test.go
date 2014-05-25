@@ -22,6 +22,36 @@ func TestSymbol(t *testing.T) {
 
 }
 
+func TestFixNum(t *testing.T) {
+	Init()
+	fix := makeFixNum(1)
+	if isFixNum(fix) == false {
+		t.Error("fix type")
+	}
+	if fix.Data.fixNum != 1 {
+		t.Error("fixNum val")
+	}
+}
+
+func TestChar(t *testing.T) {
+	Init()
+	char := makeChar('a')
+	if isChar(char) == false ||
+		char.Data.char != 'a' {
+		t.Error("char error")
+	}
+}
+
+func TestString(t *testing.T) {
+	Init()
+	val := "this is good"
+	str := makeString(val)
+	if isString(str) == false ||
+		str.Data.str != val {
+		t.Error("string error")
+	}
+}
+
 func TestTrueFalse(t *testing.T) {
 	Init()
 	if isFalse(The_False) == false {
