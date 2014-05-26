@@ -18,6 +18,8 @@ const (
 	EOF_OBJECT
 )
 
+// For lack of union type in golang, ObjData will use for all type values
+// Not effecient in memory now.
 type ObjData struct {
 	boolean int
 	str     string
@@ -28,6 +30,13 @@ type ObjData struct {
 	//pair data
 	car *Object
 	cdr *Object
+
+	//primitive proc
+	primitive interface{}
+
+	compond_params *Object
+	compond_body   *Object
+	compond_env    *Object
 }
 
 type Object struct {
@@ -42,7 +51,7 @@ func allocObject() *Object {
 }
 
 var SymbolTable map[string]*Object
-var The_Empty_List *Object
+var The_EmptyList *Object
 var The_True *Object
 var The_False *Object
 var Set_Symbol *Object
@@ -136,6 +145,34 @@ func isPair(obj *Object) bool {
 	return obj.Type == PAIR
 }
 
+func setCar(pair *Object, obj *Object) {
+	if pair.Type != PAIR {
+		panic("setCar")
+	}
+	pair.Data.car = obj
+}
+
+func setCdr(pair *Object, obj *Object) {
+	if pair.Type != PAIR {
+		panic("setCdr")
+	}
+	pair.Data.cdr = obj
+}
+
+func car(pair *Object) *Object {
+	if pair.Type != PAIR {
+		panic("car")
+	}
+	return pair.Data.car
+}
+
+func cdr(pair *Object) *Object {
+	if pair.Type != PAIR {
+		panic("cdr")
+	}
+	return pair.Data.cdr
+}
+
 func cons(car *Object, cdr *Object) *Object {
 	obj := allocObject()
 	obj.Type = PAIR
@@ -204,10 +241,21 @@ func defineVar(avar *Object, aval *Object, env *Object) {
 	addBinding(avar, aval, env)
 }
 
+func makePrimitiveProc(fun interface{}) *Object {
+	obj := allocObject()
+	obj.Type = PRIMITIVE_PROC
+	obj.Data.primitive = fun
+	return obj
+}
+
+func isPrimitiveProc(obj *Object) bool {
+	return obj.Type == PRIMITIVE_PROC
+}
+
 func Init() {
 	SymbolTable = make(map[string]*Object)
-	The_Empty_List = allocObject()
-	The_Empty_List.Type = EMPTY_LIST
+	The_EmptyList = allocObject()
+	The_EmptyList.Type = EMPTY_LIST
 	The_True = makeBoolean(1)
 	The_False = makeBoolean(0)
 	Set_Symbol = makeSymbol("set!")

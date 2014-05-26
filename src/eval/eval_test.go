@@ -4,7 +4,7 @@ import "testing"
 
 func TestEmptyList(t *testing.T) {
 	Init()
-	if isEmptyList(The_Empty_List) == false {
+	if isEmptyList(The_EmptyList) == false {
 		t.Error("empty_list failed")
 	}
 }
@@ -67,5 +67,19 @@ func TestEverything(t *testing.T) {
 	res := cons(OK_Symbol, If_Symbol)
 	if isPair(res) == false {
 		t.Error("should be PAIR type")
+	}
+	if car(res) != OK_Symbol {
+		t.Error("should be equal on car")
+	}
+	if cdr(res) != If_Symbol {
+		t.Error("should be equal on cdr")
+	}
+	setCar(res, If_Symbol)
+	if car(res) != If_Symbol {
+		t.Error("should be equal on car")
+	}
+	setCdr(res, OK_Symbol)
+	if cdr(res) != OK_Symbol {
+		t.Error("should be equal on cdr")
 	}
 }
