@@ -33,6 +33,28 @@ func TestFixNum(t *testing.T) {
 	}
 }
 
+func TestAddProc(t *testing.T) {
+	Init()
+	arg1 := makeFixNum(1)
+	arg2 := makeFixNum(2)
+	arg3 := makeFixNum(3)
+	args := cons(arg1,
+		cons(arg2,
+			cons(arg3, The_EmptyList)))
+	if isEmptyList(args) {
+		t.Error("add proc")
+	}
+	res := addProc(args)
+	if res.Data.fixNum != 6 {
+		t.Error("add proc fail")
+	}
+	primitive := makePrimitiveProc(addProc)
+	if isPrimitiveProc(primitive) == false {
+		t.Error("primitivie")
+	}
+	res = (primitive.Data.primitive)(args)
+}
+
 func TestChar(t *testing.T) {
 	Init()
 	char := makeChar('a')

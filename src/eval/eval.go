@@ -18,6 +18,8 @@ const (
 	EOF_OBJECT
 )
 
+type ObjFun func(args *Object) *Object
+
 // For lack of union type in golang, ObjData will use for all type values
 // Not effecient in memory now.
 type ObjData struct {
@@ -32,7 +34,7 @@ type ObjData struct {
 	cdr *Object
 
 	//primitive proc
-	primitive interface{}
+	primitive ObjFun
 
 	compond_params *Object
 	compond_body   *Object
@@ -45,8 +47,7 @@ type Object struct {
 }
 
 func allocObject() *Object {
-	obj := &Object{}
-	obj.Type = UNDEF
+	obj := &Object{Type: UNDEF}
 	return obj
 }
 
@@ -226,6 +227,11 @@ func lookupVar(avar *Object, env *Object) *Object {
 	return nil
 }
 
+func makeEnv() *Object {
+	env := extendEnv(The_EmptyList, The_EmptyList, The_Empty_Env)
+	return env
+}
+
 func defineVar(avar *Object, aval *Object, env *Object) {
 	frame := firstFrame(env)
 	vars := frame.Data.car
@@ -241,7 +247,7 @@ func defineVar(avar *Object, aval *Object, env *Object) {
 	addBinding(avar, aval, env)
 }
 
-func makePrimitiveProc(fun interface{}) *Object {
+func makePrimitiveProc(fun ObjFun) *Object {
 	obj := allocObject()
 	obj.Type = PRIMITIVE_PROC
 	obj.Data.primitive = fun
@@ -250,6 +256,28 @@ func makePrimitiveProc(fun interface{}) *Object {
 
 func isPrimitiveProc(obj *Object) bool {
 	return obj.Type == PRIMITIVE_PROC
+}
+
+func addProcedure(name string, fun ObjFun, env *Object) {
+	defineVar(makeSymbol(name),
+		makePrimitiveProc(fun),
+		env)
+}
+
+func addProc(args *Object) *Object {
+	res := 0
+	for {
+		if isEmptyList(args) {
+			break
+		}
+		res += (car(args)).Data.fixNum
+		args = cdr(args)
+	}
+	return makeFixNum(res)
+}
+
+func setupEnv(env *Object) {
+	addProcedure("+", addProc, env)
 }
 
 func Init() {
