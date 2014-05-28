@@ -4,7 +4,7 @@ import "testing"
 
 func TestEmptyList(t *testing.T) {
 	Init()
-	if isEmptyList(The_EmptyList) == false {
+	if !isEmptyList(The_EmptyList) {
 		t.Error("empty_list failed")
 	}
 }
@@ -54,6 +54,31 @@ func TestAddProc(t *testing.T) {
 		t.Error("primitivie")
 	}
 	res = (primitive.Data.primitive)(args)
+}
+
+func TestSubProc(t *testing.T) {
+	Init()
+	arg1 := makeFixNum(1)
+	arg2 := makeFixNum(2)
+	arg3 := makeFixNum(3)
+	args := cons(arg1,
+		cons(arg2,
+			cons(arg3, The_EmptyList)))
+	if isEmptyList(args) {
+		t.Error("sub proc")
+	}
+	res := subProc(args)
+	if !(isFixNum(res) && res.Data.fixNum == -4) {
+		t.Error("sub proc fail")
+	}
+	primitive := makePrimitiveProc(subProc)
+	if isPrimitiveProc(primitive) == false {
+		t.Error("primitivie")
+	}
+	res = (primitive.Data.primitive)(args)
+	if !(isFixNum(res) && res.Data.fixNum == -4) {
+		t.Error("sub proc fail")
+	}
 }
 
 func TestChar(t *testing.T) {
