@@ -2,13 +2,12 @@ package main
 
 import (
 	"bufio"
+	"eval"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
-
-	"github.com/chenyukang/GoScheme/eval"
 )
 
 func Usage() {
