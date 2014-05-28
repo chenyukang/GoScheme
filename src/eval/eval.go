@@ -58,24 +58,12 @@ func allocObject() *Object {
 }
 
 var SymbolTable map[string]*Object
-var The_EmptyList *Object
-var The_True *Object
-var The_False *Object
-var Set_Symbol *Object
-var OK_Symbol *Object
-var If_Symbol *Object
-var Else_Symbol *Object
-var Cond_Symbol *Object
-var Or_Symbol *Object
-var Quote_Symbol *Object
-var Lambda_Symbol *Object
-var Define_Symbol *Object
-var Begin_Symbol *Object
-var Let_Symbol *Object
-var And_Symbol *Object
-var Eof_Symbol *Object
-var The_Empty_Env *Object
-var The_Global_Env *Object
+
+var The_EmptyList, The_True, The_False *Object
+var The_Empty_Env, The_Global_Env *Object
+var Set_Symbol, OK_Symbol, If_Symbol, Else_Symbol *Object
+var Cond_Symbol, Or_Symbol, And_Symbol, Quote_Symbol, Lambda_Symbol *Object
+var Define_Symbol, Begin_Symbol, Let_Symbol, Eof_Symbol *Object
 
 func makeSymbol(sym string) *Object {
 	if obj, ok := SymbolTable[sym]; ok {
