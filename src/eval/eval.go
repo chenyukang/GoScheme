@@ -207,8 +207,8 @@ func extendEnv(vars *Object, vals *Object, baseEnv *Object) *Object {
 }
 
 func addBinding(avar *Object, aval *Object, frame *Object) {
-	frame.Data.car = cons(avar, frame.Data.car)
-	frame.Data.cdr = cons(aval, frame.Data.cdr)
+	frame.Data.car = cons(avar, car(frame))
+	frame.Data.cdr = cons(aval, cdr(frame))
 }
 
 func firstFrame(env *Object) *Object {
@@ -233,15 +233,10 @@ func lookupVar(avar *Object, env *Object) *Object {
 	return nil
 }
 
-func makeEnv() *Object {
-	env := extendEnv(The_EmptyList, The_EmptyList, The_Empty_Env)
-	return env
-}
-
 func defineVar(avar *Object, aval *Object, env *Object) {
 	frame := firstFrame(env)
-	vars := frame.Data.car
-	vals := frame.Data.cdr
+	vars := car(frame)
+	vals := cdr(frame)
 	for !isEmptyList(vars) {
 		if avar == vars.Data.car {
 			vals.Data.cdr = aval
@@ -250,7 +245,7 @@ func defineVar(avar *Object, aval *Object, env *Object) {
 		vars = vars.Data.cdr
 		vals = vals.Data.cdr
 	}
-	addBinding(avar, aval, env)
+	addBinding(avar, aval, frame)
 }
 
 func makePrimitiveProc(fun ObjFun) *Object {
@@ -320,6 +315,11 @@ func divProc(args *Object) *Object {
 	return makeFixNum(res)
 }
 
+func makeEnv() *Object {
+	env := extendEnv(The_EmptyList, The_EmptyList, The_Empty_Env)
+	return env
+}
+
 func setupEnv(env *Object) {
 	addProcedure("+", addProc, env)
 	addProcedure("-", subProc, env)
@@ -345,4 +345,7 @@ func Init() {
 	Quote_Symbol = makeSymbol("quote")
 	Lambda_Symbol = makeSymbol("lambda")
 	Cond_Symbol = makeSymbol("cond")
+	The_Empty_Env = The_EmptyList
+	The_Global_Env = makeEnv()
+	setupEnv(The_Global_Env)
 }
