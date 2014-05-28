@@ -153,30 +153,18 @@ func isPair(obj *Object) bool {
 }
 
 func setCar(pair *Object, obj *Object) {
-	if pair.Type != PAIR {
-		panic("setCar")
-	}
 	pair.Data.car = obj
 }
 
 func setCdr(pair *Object, obj *Object) {
-	if pair.Type != PAIR {
-		panic("setCdr")
-	}
 	pair.Data.cdr = obj
 }
 
 func car(pair *Object) *Object {
-	if pair.Type != PAIR {
-		panic("car")
-	}
 	return pair.Data.car
 }
 
 func cdr(pair *Object) *Object {
-	if pair.Type != PAIR {
-		panic("cdr")
-	}
 	return pair.Data.cdr
 }
 
@@ -187,8 +175,6 @@ func cons(car *Object, cdr *Object) *Object {
 	obj.Data.cdr = cdr
 	return obj
 }
-
-type Frame Object
 
 func makeFrame(vars *Object, vals *Object) *Object {
 	return cons(vars, vals)
@@ -259,10 +245,111 @@ func isPrimitiveProc(obj *Object) bool {
 	return obj.Type == PRIMITIVE_PROC
 }
 
+func isNullProc(args *Object) *Object {
+	if isEmptyList(args) {
+		return The_True
+	} else {
+		return The_False
+	}
+}
+
+func isBooleanProc(args *Object) *Object {
+	if isBoolean(car(args)) {
+		return The_True
+	} else {
+		return The_False
+	}
+}
+
+func isSymbolProc(args *Object) *Object {
+	if isSymbol(car(args)) {
+		return The_True
+	} else {
+		return The_False
+	}
+}
+
+func isIntegerProc(args *Object) *Object {
+	if isFixNum(car(args)) {
+		return The_True
+	} else {
+		return The_False
+	}
+}
+
+func isCharProc(args *Object) *Object {
+	if isChar(car(args)) {
+		return The_True
+	} else {
+		return The_False
+	}
+}
+
+func isStringProc(args *Object) *Object {
+	if isString(car(args)) {
+		return The_True
+	} else {
+		return The_False
+	}
+}
+
+func isPairProc(args *Object) *Object {
+	if isPair(car(args)) {
+		return The_True
+	} else {
+		return The_False
+	}
+}
+
 func addProcedure(name string, fun ObjFun, env *Object) {
 	defineVar(makeSymbol(name),
 		makePrimitiveProc(fun),
 		env)
+}
+
+func isNumEqualProc(args *Object) *Object {
+	value := (car(args)).Data.fixNum
+	args = cdr(args)
+	for {
+		if isEmptyList(args) {
+			break
+		}
+		if value != (car(args)).Data.fixNum {
+			return The_False
+		}
+		args = cdr(args)
+	}
+	return The_True
+}
+
+func isLessProc(args *Object) *Object {
+	value := (car(args)).Data.fixNum
+	args = cdr(args)
+	for {
+		if isEmptyList(args) {
+			break
+		}
+		if value >= (car(args)).Data.fixNum {
+			return The_False
+		}
+		args = cdr(args)
+	}
+	return The_True
+}
+
+func isLargerProc(args *Object) *Object {
+	value := (car(args)).Data.fixNum
+	args = cdr(args)
+	for {
+		if isEmptyList(args) {
+			break
+		}
+		if value <= (car(args)).Data.fixNum {
+			return The_False
+		}
+		args = cdr(args)
+	}
+	return The_True
 }
 
 func addProc(args *Object) *Object {
@@ -309,7 +396,11 @@ func divProc(args *Object) *Object {
 		if isEmptyList(args) {
 			break
 		}
-		res /= (car(args)).Data.fixNum
+		next := (car(args)).Data.fixNum
+		if next == 0 {
+			panic("divide zero")
+		}
+		res /= next
 		args = cdr(args)
 	}
 	return makeFixNum(res)
@@ -325,6 +416,15 @@ func setupEnv(env *Object) {
 	addProcedure("-", subProc, env)
 	addProcedure("*", mulProc, env)
 	addProcedure("/", divProc, env)
+	addProcedure("=", isNumEqualProc, env)
+	addProcedure("<", isLessProc, env)
+	addProcedure(">", isLargerProc, env)
+	addProcedure("null?", isNullProc, env)
+	addProcedure("boolean?", isBooleanProc, env)
+	addProcedure("integer?", isIntegerProc, env)
+	addProcedure("symbol?", isSymbolProc, env)
+	addProcedure("string?", isStringProc, env)
+	addProcedure("pair?", isPairProc, env)
 }
 
 func Init() {

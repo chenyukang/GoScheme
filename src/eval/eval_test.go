@@ -81,6 +81,26 @@ func TestSubProc(t *testing.T) {
 	}
 }
 
+func TestDiv(t *testing.T) {
+	Init()
+	arg1 := makeFixNum(4)
+	arg2 := makeFixNum(2)
+	args := cons(arg1,
+		cons(arg2, The_EmptyList))
+	res := divProc(args)
+	if !(isFixNum(res) && res.Data.fixNum == 2) {
+		t.Error("div proc fail")
+	}
+	primitive := makePrimitiveProc(divProc)
+	if isPrimitiveProc(primitive) == false {
+		t.Error("primitivie")
+	}
+	res = (primitive.Data.primitive)(args)
+	if !(isFixNum(res) && res.Data.fixNum == 2) {
+		t.Error("div proc fail")
+	}
+}
+
 func TestChar(t *testing.T) {
 	Init()
 	char := makeChar('a')
@@ -120,5 +140,19 @@ func TestEverything(t *testing.T) {
 	setCdr(res, OK_Symbol)
 	if !(isPair(res) && car(res) == If_Symbol && cdr(res) == OK_Symbol) {
 		t.Error("should be equal on cdr")
+	}
+}
+
+func TestIsProc_Family(t *testing.T) {
+	args := cons(The_True, The_EmptyList)
+	res := isBooleanProc(args)
+	if isTrue(res) == false {
+		t.Error("isBooleanProc error")
+	}
+	sym := makeSymbol("OK")
+	args = cons(sym, The_EmptyList)
+	res = isSymbolProc(args)
+	if isTrue(res) == false {
+		t.Error("isSymbolProc error")
 	}
 }
