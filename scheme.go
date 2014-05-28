@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"eval"
+	"bufio"
 	"flag"
-	"os"
+	"fmt"
 	"io"
 	"log"
-	"bufio"
+	"os"
+
+	"github.com/chenyukang/GoScheme/eval"
 )
 
 func Usage() {
@@ -24,20 +25,20 @@ func main() {
 	file := os.Stdin
 	if len(args) >= 1 {
 		fileName := args[0]
-                fileReader, _err := os.Open(fileName)
-                if _err != nil {
-                        log.Fatal(_err)
-                        os.Exit(1)
-                }
-                file =  fileReader
-        }
+		fileReader, _err := os.Open(fileName)
+		if _err != nil {
+			log.Fatal(_err)
+			os.Exit(1)
+		}
+		file = fileReader
+	}
 
 	fmt.Println("Welcome to GoScheme.\nUse Ctrl-C to exit.")
 	eval.Init()
 
 	reader := bufio.NewReader(file)
 	for {
-		byte, err := reader.ReadString('\n');
+		byte, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
 				fmt.Println("finished")

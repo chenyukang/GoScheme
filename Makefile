@@ -1,9 +1,9 @@
 export GOPATH=$(shell pwd)
 
 test:
-	go test -v eval
+	go test -v ./eval
 build:
-	go build GoScheme
+	go build scheme.go
 
 clean:
-	rm -rf ./GoScheme
+	rm -rf ./scheme
