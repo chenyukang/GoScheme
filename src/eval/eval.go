@@ -41,6 +41,12 @@ type ObjData struct {
 	compond_env    *Object
 }
 
+func assert(exp bool, msg string) {
+	if exp == false {
+		panic(msg)
+	}
+}
+
 type Object struct {
 	Type ObjType
 	Data ObjData
@@ -265,12 +271,27 @@ func addProcedure(name string, fun ObjFun, env *Object) {
 }
 
 func addProc(args *Object) *Object {
+	assert(isPair(args), "addProc parameters error")
 	res := 0
 	for {
 		if isEmptyList(args) {
 			break
 		}
 		res += (car(args)).Data.fixNum
+		args = cdr(args)
+	}
+	return makeFixNum(res)
+}
+
+func subProc(args *Object) *Object {
+	assert(isPair(args), "subProc parameters error")
+	res := (car(args)).Data.fixNum
+	args = cdr(args)
+	for {
+		if isEmptyList(args) {
+			break
+		}
+		res -= (car(args)).Data.fixNum
 		args = cdr(args)
 	}
 	return makeFixNum(res)
