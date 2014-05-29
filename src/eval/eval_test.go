@@ -143,6 +143,23 @@ func TestEverything(t *testing.T) {
 	}
 }
 
+func TestVarLookup(t *testing.T) {
+	Init()
+	sym := makeSymbol("+")
+	obj := lookupVar(sym, The_Global_Env)
+	if !(obj.Type == PRIMITIVE_PROC &&
+		obj.Data.primitive != nil) {
+		t.Error("varlookup")
+	}
+	var1 := makeFixNum(1)
+	var2 := makeFixNum(2)
+	args := cons(var1, cons(var2, The_EmptyList))
+	res := obj.Data.primitive(args)
+	if !(isFixNum(res) && res.Data.fixNum == 3) {
+		t.Error("varlookup error for addProc")
+	}
+}
+
 func TestIsProc_Family(t *testing.T) {
 	args := cons(The_True, The_EmptyList)
 	res := isBooleanProc(args)
