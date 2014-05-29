@@ -1,5 +1,10 @@
 package eval
 
+import (
+	"fmt"
+	"os"
+)
+
 type ObjType int
 
 const (
@@ -428,6 +433,57 @@ func setcdrProc(args *Object) *Object {
 	return OK_Symbol
 }
 
+func listProc(args *Object) *Object {
+	return args
+}
+
+func eqProc(args *Object) *Object {
+	obj1 := car(args)
+	obj2 := cadr(args)
+	if obj1.Type != obj2.Type {
+		return The_False
+	}
+	switch obj1.Type {
+	case FIXNUM:
+		if obj1.Data.fixNum == obj2.Data.fixNum {
+			return The_True
+		} else {
+			return The_False
+		}
+	case CHARACTER:
+		if obj1.Data.char == obj2.Data.char {
+			return The_True
+		} else {
+			return The_False
+		}
+	case STRING:
+		if obj1.Data.str == obj2.Data.str {
+			return The_True
+		} else {
+			return The_False
+		}
+	default:
+		if obj1 == obj2 {
+			return The_True
+		} else {
+			return The_False
+		}
+	}
+}
+
+func errorProc(args *Object) *Object {
+	fmt.Println("Error:")
+	for {
+		if isEmptyList(args) {
+			break
+		}
+		fmt.Println(car(args))
+		args = cdr(args)
+	}
+	os.Exit(1)
+	return nil
+}
+
 func makeEnv() *Object {
 	env := extendEnv(The_EmptyList, The_EmptyList, The_Empty_Env)
 	return env
@@ -453,6 +509,8 @@ func setupEnv(env *Object) {
 	addProcedure("cdr", cdrProc, env)
 	addProcedure("set-car!", setcarProc, env)
 	addProcedure("set-cdr!", setcdrProc, env)
+
+	addProcedure("error", errorProc, env)
 
 }
 
