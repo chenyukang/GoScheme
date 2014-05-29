@@ -394,6 +394,40 @@ func divProc(args *Object) *Object {
 	return makeFixNum(res)
 }
 
+func cadr(obj *Object) *Object {
+	return car(cdr(obj))
+}
+
+func caar(obj *Object) *Object {
+	return car(car(obj))
+}
+
+func cdar(obj *Object) *Object {
+	return cdr(car(obj))
+}
+
+func consProc(args *Object) *Object {
+	return cons(car(args), cadr(args))
+}
+
+func carProc(args *Object) *Object {
+	return caar(args)
+}
+
+func cdrProc(args *Object) *Object {
+	return cdar(args)
+}
+
+func setcarProc(args *Object) *Object {
+	setCar(car(args), cadr(args))
+	return OK_Symbol
+}
+
+func setcdrProc(args *Object) *Object {
+	setCdr(car(args), cadr(args))
+	return OK_Symbol
+}
+
 func makeEnv() *Object {
 	env := extendEnv(The_EmptyList, The_EmptyList, The_Empty_Env)
 	return env
@@ -413,6 +447,13 @@ func setupEnv(env *Object) {
 	addProcedure("symbol?", isSymbolProc, env)
 	addProcedure("string?", isStringProc, env)
 	addProcedure("pair?", isPairProc, env)
+
+	addProcedure("cons", consProc, env)
+	addProcedure("car", carProc, env)
+	addProcedure("cdr", cdrProc, env)
+	addProcedure("set-car!", setcarProc, env)
+	addProcedure("set-cdr!", setcdrProc, env)
+
 }
 
 func Init() {
