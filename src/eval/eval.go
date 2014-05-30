@@ -1,7 +1,9 @@
 package eval
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -535,4 +537,20 @@ func Init() {
 	The_Empty_Env = The_EmptyList
 	The_Global_Env = makeEnv()
 	setupEnv(The_Global_Env)
+}
+
+func Run(reader bufio.Reader) {
+	for {
+		byte, err := reader.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				fmt.Println("finished")
+			} else {
+				fmt.Println("error happened")
+			}
+			return
+		}
+		fmt.Printf("Got: %s", byte)
+	}
+
 }
