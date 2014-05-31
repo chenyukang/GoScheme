@@ -31,7 +31,6 @@ func main() {
 		file = fileReader
 	}
 
-	fmt.Println("Welcome to GoScheme.\nUse Ctrl-C to exit.")
 	eval.Init()
 
 	reader := bufio.NewReader(file)

@@ -588,6 +588,8 @@ func write(obj *Object) {
 }
 
 func Run(reader *bufio.Reader) {
+	fmt.Printf("Welcome to Bootstrap Scheme.\nUse ctrl-c to exit.\n")
+
 	for {
 		fmt.Printf("> ")
 		exp := read(reader)
