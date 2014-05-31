@@ -3,7 +3,6 @@ package eval
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 )
 
@@ -539,18 +538,63 @@ func Init() {
 	setupEnv(The_Global_Env)
 }
 
-func Run(reader bufio.Reader) {
+func ungetc(reader *bufio.Reader) {
+	err := reader.UnreadByte()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func isSpace(val byte) bool {
+	if val == '\t' || val == '\n' || val == '\r' || val == ' ' {
+		return true
+	} else {
+		return false
+	}
+}
+
+func eatWhiteSpace(reader *bufio.Reader) {
 	for {
-		byte, err := reader.ReadString('\n')
+		c, err := reader.ReadByte()
 		if err != nil {
-			if err == io.EOF {
-				fmt.Println("finished")
-			} else {
-				fmt.Println("error happened")
-			}
-			return
+			break
 		}
-		fmt.Printf("Got: %s", byte)
+		if isSpace(c) {
+			continue
+		} else if c == ';' {
+			for {
+				v, err := reader.ReadByte()
+				if err != nil || v == '\n' {
+					break
+				}
+			}
+			continue
+		}
+		ungetc(reader)
+		break
 	}
 
+}
+
+func read(reader *bufio.Reader) *Object {
+	return nil
+}
+
+func eval(exp *Object, env *Object) *Object {
+	return nil
+}
+
+func write(obj *Object) {
+}
+
+func Run(reader *bufio.Reader) {
+	for {
+		fmt.Printf("> ")
+		exp := read(reader)
+		if exp == nil {
+			break
+		}
+		write(eval(exp, The_Global_Env))
+		fmt.Println()
+	}
 }

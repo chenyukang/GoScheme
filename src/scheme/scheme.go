@@ -5,7 +5,6 @@ import (
 	"eval"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 )
@@ -36,16 +35,5 @@ func main() {
 	eval.Init()
 
 	reader := bufio.NewReader(file)
-	for {
-		byte, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				fmt.Println("finished")
-			} else {
-				fmt.Println("error happened")
-			}
-			return
-		}
-		fmt.Printf("Got: %s", byte)
-	}
+	eval.Run(reader)
 }
