@@ -75,7 +75,8 @@ func isSpace(val byte) bool {
 }
 
 func isDelimiter(val byte) bool {
-	if isSpace(val) || val == '(' || val == ')' || val == '"' || val == ';' {
+	if isSpace(val) || val == '(' || val == ')' ||
+		val == '"' || val == ';' {
 		return true
 	} else {
 		return false
@@ -179,8 +180,17 @@ func read(reader *bufio.Reader) *Object {
 		} else {
 			panic("number not followed by delimiter\n")
 		}
+	} else if c == '"' { //read a string
+		buf := ""
+		for {
+			n := readc(reader)
+			if n == '"' {
+				break
+			}
+			buf += string(n)
+		}
+		return makeString(buf)
 	}
-
 	return nil
 }
 
@@ -209,6 +219,8 @@ func write(obj *Object) {
 		}
 	case FIXNUM:
 		fmt.Fprintf(os.Stderr, "%d", obj.Data.fixNum)
+	case STRING:
+		fmt.Fprintf(os.Stderr, "\"%s\"", obj.Data.str)
 	default:
 		fmt.Println(obj)
 	}
