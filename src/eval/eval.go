@@ -3,6 +3,7 @@ package eval
 import (
 	"bufio"
 	"fmt"
+	"os"
 )
 
 func makeEnv() *Object {
@@ -96,15 +97,44 @@ func eatWhiteSpace(reader *bufio.Reader) {
 
 }
 
+func readChar(reader *bufio.Reader) *Object {
+	return nil
+}
+
 func read(reader *bufio.Reader) *Object {
+	eatWhiteSpace(reader)
+	c, _ := reader.ReadByte()
+	if c == '#' {
+		c, _ := reader.ReadByte()
+		switch c {
+		case 't':
+			return The_True
+		case 'f':
+			return The_False
+		case '\\':
+			return readChar(reader)
+		default:
+			panic("unknown boolean or character literal\n")
+		}
+	}
 	return nil
 }
 
 func eval(exp *Object, env *Object) *Object {
-	return nil
+	return exp
 }
 
 func write(obj *Object) {
+	switch obj.Type {
+	case BOOLEAN:
+		if isFalse(obj) {
+			fmt.Fprintf(os.Stderr, "#f")
+		} else {
+			fmt.Fprintf(os.Stderr, "#t")
+		}
+	default:
+		fmt.Println(obj)
+	}
 }
 
 func Run(reader *bufio.Reader) {
