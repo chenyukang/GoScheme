@@ -74,6 +74,14 @@ func isSpace(val byte) bool {
 	}
 }
 
+func isDelimiter(val byte) bool {
+	if isSpace(val) || val == '(' || val == ')' || val == '"' || val == ';' {
+		return true
+	} else {
+		return false
+	}
+}
+
 func eatWhiteSpace(reader *bufio.Reader) {
 	for {
 		c, err := reader.ReadByte()
@@ -98,7 +106,15 @@ func eatWhiteSpace(reader *bufio.Reader) {
 }
 
 func readChar(reader *bufio.Reader) *Object {
-	return nil
+	c, err := reader.ReadByte()
+	if err != nil {
+		panic("incomplete char literal\n")
+	}
+	next, _ := reader.Peek(1)
+	if !isDelimiter(next[0]) {
+		panic("character not followed by delimiter\n")
+	}
+	return makeChar(c)
 }
 
 func read(reader *bufio.Reader) *Object {
@@ -131,6 +147,17 @@ func write(obj *Object) {
 			fmt.Fprintf(os.Stderr, "#f")
 		} else {
 			fmt.Fprintf(os.Stderr, "#t")
+		}
+	case CHARACTER:
+		c := obj.Data.char
+		fmt.Fprintf(os.Stderr, "#\\")
+		switch c {
+		case '\n':
+			fmt.Fprintf(os.Stderr, "newline")
+		case ' ':
+			fmt.Fprintf(os.Stderr, "space")
+		default:
+			fmt.Fprintf(os.Stderr, "%c", c)
 		}
 	default:
 		fmt.Println(obj)
