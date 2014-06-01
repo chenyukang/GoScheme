@@ -141,6 +141,28 @@ func isDigit(val byte) bool {
 	}
 }
 
+func isAlpha(val byte) bool {
+	if (val >= 'a' && val <= 'z') ||
+		(val >= 'A' && val <= 'Z') {
+		return true
+	} else {
+		return false
+	}
+}
+
+func isInitial(val byte) bool {
+	if isAlpha(val) ||
+		val == '*' || val == '/' ||
+		val == '+' || val == '-' ||
+		val == '>' || val == '<' ||
+		val == '=' || val == '?' ||
+		val == '!' {
+		return true
+	} else {
+		return false
+	}
+}
+
 func read(reader *bufio.Reader) *Object {
 	eatWhiteSpace(reader)
 	c, _ := reader.ReadByte()
@@ -190,6 +212,23 @@ func read(reader *bufio.Reader) *Object {
 			buf += string(n)
 		}
 		return makeString(buf)
+	} else if isInitial(c) {
+		fmt.Println("now haha")
+		n := c
+		buf := string(c)
+		for {
+			n = readc(reader)
+			if !isInitial(n) {
+				break
+			}
+			buf += string(n)
+
+		}
+		if isDelimiter(n) {
+			return makeSymbol(buf)
+		}
+	} else if c == '\'' {
+		return cons(Quote_Symbol, cons(read(reader), The_EmptyList))
 	}
 	return nil
 }
@@ -199,6 +238,7 @@ func eval(exp *Object, env *Object) *Object {
 }
 
 func write(obj *Object) {
+	fmt.Println("obj: ", obj)
 	switch obj.Type {
 	case BOOLEAN:
 		if isFalse(obj) {
@@ -206,6 +246,8 @@ func write(obj *Object) {
 		} else {
 			fmt.Fprintf(os.Stderr, "#t")
 		}
+	case SYMBOL:
+		fmt.Fprintf(os.Stderr, "%s", obj.Data.symbol)
 	case CHARACTER:
 		c := obj.Data.char
 		fmt.Fprintf(os.Stderr, "#\\")
