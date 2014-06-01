@@ -82,6 +82,22 @@ func isDelimiter(val byte) bool {
 	}
 }
 
+func peekc(reader *bufio.Reader) byte {
+	c, err := reader.Peek(1)
+	if err != nil {
+		panic(err)
+	}
+	return c[0]
+}
+
+func readc(reader *bufio.Reader) byte {
+	c, err := reader.ReadByte()
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
 func eatWhiteSpace(reader *bufio.Reader) {
 	for {
 		c, err := reader.ReadByte()
@@ -110,11 +126,18 @@ func readChar(reader *bufio.Reader) *Object {
 	if err != nil {
 		panic("incomplete char literal\n")
 	}
-	next, _ := reader.Peek(1)
-	if !isDelimiter(next[0]) {
+	if !isDelimiter(peekc(reader)) {
 		panic("character not followed by delimiter\n")
 	}
 	return makeChar(c)
+}
+
+func isDigit(val byte) bool {
+	if val >= '0' && val <= '9' {
+		return true
+	} else {
+		return false
+	}
 }
 
 func read(reader *bufio.Reader) *Object {
@@ -132,7 +155,32 @@ func read(reader *bufio.Reader) *Object {
 		default:
 			panic("unknown boolean or character literal\n")
 		}
+	} else if isDigit(c) || (c == '-' && (isDigit(peekc(reader)))) {
+		//make a number
+		sign := 1
+		if c == '-' {
+			sign = -1
+		} else {
+			reader.UnreadByte()
+		}
+		num := 0
+		n := c
+		for {
+			n = readc(reader)
+			if !isDigit(n) {
+				break
+			}
+			num = (num * 10) + (int(n) - '0')
+		}
+		num *= sign
+		if isDelimiter(n) {
+			reader.UnreadByte()
+			return makeFixNum(num)
+		} else {
+			panic("number not followed by delimiter\n")
+		}
 	}
+
 	return nil
 }
 
@@ -159,6 +207,8 @@ func write(obj *Object) {
 		default:
 			fmt.Fprintf(os.Stderr, "%c", c)
 		}
+	case FIXNUM:
+		fmt.Fprintf(os.Stderr, "%d", obj.Data.fixNum)
 	default:
 		fmt.Println(obj)
 	}
