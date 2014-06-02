@@ -163,6 +163,25 @@ func isInitial(val byte) bool {
 	}
 }
 
+func readPair(reader *bufio.Reader) *Object {
+	eatWhiteSpace(reader)
+	c := readc(reader)
+	if c == ')' {
+		return The_EmptyList
+	}
+	reader.UnreadByte()
+	carObj := read(reader)
+	eatWhiteSpace(reader)
+	c = readc(reader)
+	if c == '.' {
+	} else {
+		reader.UnreadByte()
+		cdrObj := readPair(reader)
+		return cons(carObj, cdrObj)
+	}
+	return nil
+}
+
 func read(reader *bufio.Reader) *Object {
 	eatWhiteSpace(reader)
 	c, _ := reader.ReadByte()
@@ -213,12 +232,11 @@ func read(reader *bufio.Reader) *Object {
 		}
 		return makeString(buf)
 	} else if isInitial(c) {
-		fmt.Println("now haha")
 		n := c
 		buf := string(c)
 		for {
 			n = readc(reader)
-			if !isInitial(n) {
+			if !(isInitial(n) || isDigit(n)) {
 				break
 			}
 			buf += string(n)
@@ -229,6 +247,8 @@ func read(reader *bufio.Reader) *Object {
 		}
 	} else if c == '\'' {
 		return cons(Quote_Symbol, cons(read(reader), The_EmptyList))
+	} else if c == '(' {
+		return readPair(reader)
 	}
 	return nil
 }
@@ -237,8 +257,22 @@ func eval(exp *Object, env *Object) *Object {
 	return exp
 }
 
+func writePair(obj *Object) {
+	carObj := car(obj)
+	cdrObj := cdr(obj)
+	write(carObj)
+	if cdrObj.Type == PAIR {
+		fmt.Fprintf(os.Stderr, " ")
+		writePair(cdrObj)
+	} else if cdrObj.Type == EMPTY_LIST {
+		return
+	} else {
+		fmt.Fprintf(os.Stderr, " . ")
+		write(cdrObj)
+	}
+}
+
 func write(obj *Object) {
-	fmt.Println("obj: ", obj)
 	switch obj.Type {
 	case BOOLEAN:
 		if isFalse(obj) {
@@ -246,6 +280,8 @@ func write(obj *Object) {
 		} else {
 			fmt.Fprintf(os.Stderr, "#t")
 		}
+	case EMPTY_LIST:
+		fmt.Fprintf(os.Stderr, "()")
 	case SYMBOL:
 		fmt.Fprintf(os.Stderr, "%s", obj.Data.symbol)
 	case CHARACTER:
@@ -263,6 +299,10 @@ func write(obj *Object) {
 		fmt.Fprintf(os.Stderr, "%d", obj.Data.fixNum)
 	case STRING:
 		fmt.Fprintf(os.Stderr, "\"%s\"", obj.Data.str)
+	case PAIR:
+		fmt.Fprintf(os.Stderr, "(")
+		writePair(obj)
+		fmt.Fprintf(os.Stderr, ")")
 	default:
 		fmt.Println(obj)
 	}
