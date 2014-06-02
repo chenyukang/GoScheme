@@ -76,7 +76,7 @@ func isSpace(val byte) bool {
 
 func isDelimiter(val byte) bool {
 	if isSpace(val) || val == '(' || val == ')' ||
-		val == '"' || val == ';' {
+		val == '"' || val == ';' || val == 0 {
 		return true
 	} else {
 		return false
@@ -92,10 +92,7 @@ func peekc(reader *bufio.Reader) byte {
 }
 
 func readc(reader *bufio.Reader) byte {
-	c, err := reader.ReadByte()
-	if err != nil {
-		panic(err)
-	}
+	c, _ := reader.ReadByte()
 	return c
 }
 
