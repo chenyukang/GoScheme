@@ -74,6 +74,7 @@ func isSpace(val byte) bool {
 	}
 }
 
+// EOF is also a delimiter
 func isDelimiter(val byte) bool {
 	if isSpace(val) || val == '(' || val == ')' ||
 		val == '"' || val == ';' || val == 0 {

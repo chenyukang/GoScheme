@@ -25,14 +25,36 @@ func parserWrapper(buf string) (*Object, error) {
 	return read(reader), nil
 }
 
-func TestParser(t *testing.T) {
+func TestParserSymbol(t *testing.T) {
 	Init()
-	obj, err := parserWrapper("demo")
-	if err != nil {
-		t.Error(err)
-	}
+	obj, _ := parserWrapper("demo")
 	if !(obj.Type == SYMBOL &&
 		obj.Data.symbol == "demo") {
 		t.Error("parser")
+	}
+}
+
+func TestParserInt(t *testing.T) {
+	Init()
+	obj, _ := parserWrapper("10")
+	if !(obj.Type == FIXNUM &&
+		obj.Data.fixNum == 10) {
+		t.Error("parser")
+	}
+}
+
+func TestParserList(t *testing.T) {
+	Init()
+	obj, _ := parserWrapper("()")
+	if obj != The_EmptyList {
+		t.Error("parser list")
+	}
+
+	obj, _ = parserWrapper("(1)")
+	if !(obj.Type == PAIR &&
+		car(obj).Type == FIXNUM &&
+		car(obj).Data.fixNum == 1 &&
+		cdr(obj) == The_EmptyList) {
+		t.Error("parser list")
 	}
 }
