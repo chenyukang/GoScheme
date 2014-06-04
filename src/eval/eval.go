@@ -87,7 +87,8 @@ func isDelimiter(val byte) bool {
 func peekc(reader *bufio.Reader) byte {
 	c, err := reader.Peek(1)
 	if err != nil {
-		panic(err)
+		//EOF
+		return 0
 	}
 	return c[0]
 }
