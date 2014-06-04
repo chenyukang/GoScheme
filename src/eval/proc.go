@@ -261,3 +261,56 @@ func errorProc(args *Object) *Object {
 	os.Exit(1)
 	return nil
 }
+
+func makeEnv() *Object {
+	env := extendEnv(The_EmptyList, The_EmptyList, The_Empty_Env)
+	return env
+}
+
+func setupEnv(env *Object) {
+	addProcedure("+", addProc, env)
+	addProcedure("-", subProc, env)
+	addProcedure("*", mulProc, env)
+	addProcedure("/", divProc, env)
+	addProcedure("=", isNumEqualProc, env)
+	addProcedure("<", isLessProc, env)
+	addProcedure(">", isLargerProc, env)
+	addProcedure("null?", isNullProc, env)
+	addProcedure("boolean?", isBooleanProc, env)
+	addProcedure("integer?", isIntegerProc, env)
+	addProcedure("symbol?", isSymbolProc, env)
+	addProcedure("string?", isStringProc, env)
+	addProcedure("pair?", isPairProc, env)
+
+	addProcedure("cons", consProc, env)
+	addProcedure("car", carProc, env)
+	addProcedure("cdr", cdrProc, env)
+	addProcedure("set-car!", setcarProc, env)
+	addProcedure("set-cdr!", setcdrProc, env)
+
+	addProcedure("error", errorProc, env)
+
+}
+
+func Init() {
+	SymbolTable = make(map[string]*Object)
+	The_EmptyList = allocObject()
+	The_EmptyList.Type = EMPTY_LIST
+	The_True = makeBoolean(1)
+	The_False = makeBoolean(0)
+	Set_Symbol = makeSymbol("set!")
+	OK_Symbol = makeSymbol("ok")
+	If_Symbol = makeSymbol("if")
+	Else_Symbol = makeSymbol("else")
+	Let_Symbol = makeSymbol("let")
+	And_Symbol = makeSymbol("and")
+	Or_Symbol = makeSymbol("or")
+	Define_Symbol = makeSymbol("define")
+	Begin_Symbol = makeSymbol("begin")
+	Quote_Symbol = makeSymbol("quote")
+	Lambda_Symbol = makeSymbol("lambda")
+	Cond_Symbol = makeSymbol("cond")
+	The_Empty_Env = The_EmptyList
+	The_Global_Env = makeEnv()
+	setupEnv(The_Global_Env)
+}

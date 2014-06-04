@@ -2,7 +2,6 @@ package eval
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -47,7 +46,6 @@ func TestParserInt(t *testing.T) {
 func TestParserChar(t *testing.T) {
 	Init()
 	obj, _ := parserWrapper("#\\h")
-	fmt.Println(obj)
 	if !(obj.Type == CHARACTER &&
 		obj.Data.char == 'h') {
 		t.Error("parser character")
