@@ -57,4 +57,11 @@ func TestParserList(t *testing.T) {
 		cdr(obj) == The_EmptyList) {
 		t.Error("parser list")
 	}
+
+	obj, _ = parserWrapper("(1 2)")
+	if !(obj.Type == PAIR &&
+		cadr(obj).Type == FIXNUM &&
+		cadr(obj).Data.fixNum == 2) {
+		t.Error("parser list")
+	}
 }
