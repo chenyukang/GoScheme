@@ -48,7 +48,7 @@ func TestParserChar(t *testing.T) {
 	obj, _ := parserWrapper("#\\h")
 	if !(obj.Type == CHARACTER &&
 		obj.Data.char == 'h') {
-		t.Error("parser character")
+		t.Error("parser character failed")
 	}
 }
 
