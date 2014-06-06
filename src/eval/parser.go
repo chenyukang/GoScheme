@@ -245,6 +245,8 @@ func write(obj *Object) {
 		fmt.Fprintf(os.Stderr, "(")
 		writePair(obj)
 		fmt.Fprintf(os.Stderr, ")")
+	case PRIMITIVE_PROC:
+		fmt.Fprintf(os.Stderr, "#<primitive-procedure>")
 	default:
 		fmt.Println(obj)
 	}
