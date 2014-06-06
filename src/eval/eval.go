@@ -51,6 +51,14 @@ func isQuoted(exp *Object) bool {
 	}
 }
 
+func isAssign(exp *Object) bool {
+	if isTaggedWith(exp, Set_Symbol) {
+		return true
+	} else {
+		return false
+	}
+}
+
 func eval(exp *Object, env *Object) *Object {
 	if isSelfEval(exp) {
 		return exp
@@ -58,6 +66,11 @@ func eval(exp *Object, env *Object) *Object {
 		return lookupVar(exp, env)
 	} else if isQuoted(exp) {
 		return cadr(exp)
+	} else if isAssign(exp) {
+		_var := cadr(exp)
+		_val := eval(car(cdr(cdr(exp))), env)
+		defineVar(_var, _val, env)
+		return OK_Symbol
 	}
 	return exp
 }
