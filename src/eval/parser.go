@@ -189,6 +189,7 @@ func read(reader *bufio.Reader) *Object {
 
 		}
 		if isDelimiter(n) {
+			ungetc(reader)
 			return makeSymbol(buf)
 		}
 	} else if c == '\'' {

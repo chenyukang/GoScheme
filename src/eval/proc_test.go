@@ -146,7 +146,7 @@ func TestEverything(t *testing.T) {
 func TestVarLookup(t *testing.T) {
 	Init()
 	sym := makeSymbol("+")
-	obj := lookupVar(sym, The_Global_Env)
+	obj, _ := lookupVar(sym, The_Global_Env)
 	if !(obj.Type == PRIMITIVE_PROC &&
 		obj.Data.primitive != nil) {
 		t.Error("varlookup")

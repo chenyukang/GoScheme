@@ -1,5 +1,7 @@
 package eval
 
+import "errors"
+
 type ObjType int
 
 const (
@@ -189,7 +191,7 @@ func firstFrame(env *Object) *Object {
 	return env.Data.car
 }
 
-func lookupVar(avar *Object, env *Object) *Object {
+func lookupVar(avar *Object, env *Object) (*Object, error) {
 	e := env
 	for !isEmptyList(e) {
 		frame := firstFrame(env)
@@ -197,14 +199,14 @@ func lookupVar(avar *Object, env *Object) *Object {
 		vals := frameVals(frame)
 		for !isEmptyList(vars) {
 			if avar == vars.Data.car {
-				return vals.Data.car
+				return vals.Data.car, nil
 			}
 			vars = vars.Data.cdr
 			vals = vals.Data.cdr
 		}
 		e = e.Data.cdr
 	}
-	return nil
+	return nil, errors.New("undef variable")
 }
 
 func defineVar(avar *Object, aval *Object, env *Object) {

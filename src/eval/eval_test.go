@@ -1,14 +1,15 @@
 package eval
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func evalWrapper(buf string) (*Object, error) {
 	Init()
 	obj, err := parserWrapper(buf)
-	return eval(obj, The_Global_Env), err
+	if err == nil {
+		return eval(obj, The_Global_Env)
+	} else {
+		return nil, err
+	}
 }
 
 func TestEvalSet(t *testing.T) {
@@ -20,7 +21,6 @@ func TestEvalSet(t *testing.T) {
 	res, _ = evalWrapper("(cons (set! a 2) a)")
 	if isPair(res) {
 		val := cdr(res)
-		fmt.Println(val)
 		if !(isFixNum(val) &&
 			val.Data.fixNum == 2) {
 			t.Error("set! failed")
@@ -32,8 +32,9 @@ func TestEvalSet(t *testing.T) {
 
 func TestEvalProc(t *testing.T) {
 	res, _ := evalWrapper("+")
+	target, _ := lookupVar(makeSymbol("+"), The_Global_Env)
 	if !(isPrimitiveProc(res) &&
-		res == lookupVar(makeSymbol("+"), The_Global_Env)) {
+		res == target) {
 		t.Error("+ proc")
 	}
 	res, _ = evalWrapper("(+ 1 2)")

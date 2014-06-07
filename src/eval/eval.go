@@ -3,6 +3,7 @@ package eval
 import (
 	"bufio"
 	"fmt"
+	"os"
 )
 
 func isApp(exp *Object) bool {
@@ -60,38 +61,45 @@ func isAssign(exp *Object) bool {
 }
 
 func listValues(exp *Object, env *Object) *Object {
-	fmt.Println(exp)
 	if isEmptyList(exp) {
 		return The_EmptyList
 	} else {
-		return cons(eval(car(exp), env),
-			listValues(cdr(exp), env))
+		first, err := eval(car(exp), env)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return cons(first, listValues(cdr(exp), env))
 	}
 }
 
-func eval(exp *Object, env *Object) *Object {
+func eval(exp *Object, env *Object) (*Object, error) {
 	if isSelfEval(exp) {
-		return exp
+		return exp, nil
 	} else if isVariable(exp) {
 		return lookupVar(exp, env)
 	} else if isQuoted(exp) {
-		return cadr(exp)
+		return cadr(exp), nil
 	} else if isAssign(exp) {
 		_var := cadr(exp)
-		_val := eval(car(cdr(cdr(exp))), env)
+		_val, err := eval(car(cdr(cdr(exp))), env)
+		if err != nil {
+			return nil, err
+		}
 		defineVar(_var, _val, env)
-		return OK_Symbol
+		return OK_Symbol, nil
 	} else if isApp(exp) {
-		proc := eval(car(exp), env)
+		proc, err := eval(car(exp), env)
+		if err != nil {
+			return nil, err
+		}
 		args := listValues(cdr(exp), env)
 		if isPrimitiveProc(proc) {
-			fmt.Println("begin primitive:")
 			val := proc.Data.primitive(args)
-			fmt.Println("end primitive:")
-			return val
+			return val, nil
 		}
 	}
-	return exp
+	return exp, nil
 }
 
 func Run(reader *bufio.Reader) {
@@ -102,7 +110,12 @@ func Run(reader *bufio.Reader) {
 		if exp == nil {
 			break
 		}
-		write(eval(exp, The_Global_Env))
+		res, err := eval(exp, The_Global_Env)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			write(res)
+		}
 		fmt.Println()
 	}
 }
