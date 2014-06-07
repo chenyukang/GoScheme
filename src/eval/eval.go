@@ -59,6 +59,16 @@ func isAssign(exp *Object) bool {
 	}
 }
 
+func listValues(exp *Object, env *Object) *Object {
+	fmt.Println(exp)
+	if isEmptyList(exp) {
+		return The_EmptyList
+	} else {
+		return cons(eval(car(exp), env),
+			listValues(cdr(exp), env))
+	}
+}
+
 func eval(exp *Object, env *Object) *Object {
 	if isSelfEval(exp) {
 		return exp
@@ -71,6 +81,15 @@ func eval(exp *Object, env *Object) *Object {
 		_val := eval(car(cdr(cdr(exp))), env)
 		defineVar(_var, _val, env)
 		return OK_Symbol
+	} else if isApp(exp) {
+		proc := eval(car(exp), env)
+		args := listValues(cdr(exp), env)
+		if isPrimitiveProc(proc) {
+			fmt.Println("begin primitive:")
+			val := proc.Data.primitive(args)
+			fmt.Println("end primitive:")
+			return val
+		}
 	}
 	return exp
 }
