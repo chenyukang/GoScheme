@@ -72,6 +72,10 @@ func isPairProc(args *Object) *Object {
 	}
 }
 
+func listProce(args *Object) *Object {
+	return args
+}
+
 func addProcedure(name string, fun ObjFun, env *Object) {
 	defineVar(makeSymbol(name),
 		makePrimitiveProc(fun),
@@ -215,37 +219,45 @@ func listProc(args *Object) *Object {
 	return args
 }
 
-func eqProc(args *Object) *Object {
-	obj1 := car(args)
-	obj2 := cadr(args)
+func equal(obj1 *Object, obj2 *Object) bool {
 	if obj1.Type != obj2.Type {
-		return The_False
+		return false
 	}
 	switch obj1.Type {
 	case FIXNUM:
 		if obj1.Data.fixNum == obj2.Data.fixNum {
-			return The_True
+			return true
 		} else {
-			return The_False
+			return false
 		}
 	case CHARACTER:
 		if obj1.Data.char == obj2.Data.char {
-			return The_True
+			return true
 		} else {
-			return The_False
+			return false
 		}
 	case STRING:
 		if obj1.Data.str == obj2.Data.str {
-			return The_True
+			return true
 		} else {
-			return The_False
+			return false
 		}
 	default:
 		if obj1 == obj2 {
-			return The_True
+			return true
 		} else {
-			return The_False
+			return false
 		}
+	}
+}
+
+func eqProc(args *Object) *Object {
+	obj1 := car(args)
+	obj2 := cadr(args)
+	if equal(obj1, obj2) {
+		return The_True
+	} else {
+		return The_False
 	}
 }
 
@@ -275,6 +287,7 @@ func setupEnv(env *Object) {
 	addProcedure("=", isNumEqualProc, env)
 	addProcedure("<", isLessProc, env)
 	addProcedure(">", isLargerProc, env)
+
 	addProcedure("null?", isNullProc, env)
 	addProcedure("boolean?", isBooleanProc, env)
 	addProcedure("integer?", isIntegerProc, env)
@@ -288,6 +301,7 @@ func setupEnv(env *Object) {
 	addProcedure("set-car!", setcarProc, env)
 	addProcedure("set-cdr!", setcdrProc, env)
 
+	addProcedure("list", listProc, env)
 	addProcedure("error", errorProc, env)
 
 }

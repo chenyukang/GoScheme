@@ -21,8 +21,7 @@ func TestEvalDef(t *testing.T) {
 	res, _ = evalWrapper("(cons (define a 2) a)")
 	if isPair(res) {
 		val := cdr(res)
-		if !(isFixNum(val) &&
-			val.Data.fixNum == 2) {
+		if !equal(val, makeFixNum(2)) {
 			t.Error("define failed")
 		}
 	} else {
@@ -51,13 +50,11 @@ func TestEvalSet(t *testing.T) {
 func TestEvalProc(t *testing.T) {
 	res, _ := evalWrapper("+")
 	target, _ := lookupVar(makeSymbol("+"), The_Global_Env)
-	if !(isPrimitiveProc(res) &&
-		res == target) {
+	if !equal(res, target) {
 		t.Error("+ proc")
 	}
 	res, _ = evalWrapper("(+ 1 2)")
-	if !(isFixNum(res) &&
-		res.Data.fixNum == 3) {
+	if !equal(res, makeFixNum(3)) {
 		t.Error("+ error")
 	}
 	res, _ = evalWrapper("(+ (- 1 2) 1)")
@@ -66,15 +63,14 @@ func TestEvalProc(t *testing.T) {
 		t.Error("+ error")
 	}
 	res, _ = evalWrapper("(* 10 (- 2 2))")
-	if !(isFixNum(res) &&
-		res.Data.fixNum == 0) {
+	if !equal(res, makeFixNum(0)) {
 		t.Error("* error")
 	}
-
 	res, _ = evalWrapper("(null? ())")
 	if res != The_True {
 		t.Error("null? failed")
 	}
+
 	res, _ = evalWrapper("(boolean? #t)")
 	if res != The_True {
 		t.Error("boolean? failed")
@@ -84,4 +80,14 @@ func TestEvalProc(t *testing.T) {
 		t.Error("integer? failed")
 	}
 
+	res, _ = evalWrapper("(= 1 2)")
+	if res != The_False {
+		t.Error("equal failed")
+	}
+
+	res, _ = evalWrapper("(list 1 2)")
+	if !(isPair(res) &&
+		equal(car(res), makeFixNum(1))) {
+		t.Error("list failed")
+	}
 }

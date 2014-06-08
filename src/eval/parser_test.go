@@ -61,16 +61,14 @@ func TestParserList(t *testing.T) {
 
 	obj, _ = parserWrapper("(1)")
 	if !(obj.Type == PAIR &&
-		car(obj).Type == FIXNUM &&
-		car(obj).Data.fixNum == 1 &&
+		equal(car(obj), makeFixNum(1)) &&
 		cdr(obj) == The_EmptyList) {
 		t.Error("parser list")
 	}
 
 	obj, _ = parserWrapper("(1 2)")
 	if !(obj.Type == PAIR &&
-		cadr(obj).Type == FIXNUM &&
-		cadr(obj).Data.fixNum == 2) {
+		equal(cadr(obj), makeFixNum(2))) {
 		t.Error("parser list")
 	}
 
@@ -78,8 +76,7 @@ func TestParserList(t *testing.T) {
 	obj = cdr(obj)
 	obj = cdr(obj)
 	obj = car(obj)
-	if !(obj.Type == FIXNUM &&
-		obj.Data.fixNum == 3) {
+	if !equal(obj, makeFixNum(3)) {
 		t.Error("parser list")
 	}
 
