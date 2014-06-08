@@ -214,12 +214,12 @@ func defineVar(avar *Object, aval *Object, env *Object) {
 	vars := car(frame)
 	vals := cdr(frame)
 	for !isEmptyList(vars) {
-		if avar == vars.Data.car {
-			vals.Data.cdr = aval
+		if avar == car(vars) {
+			setCar(vals, aval)
 			return
 		}
-		vars = vars.Data.cdr
-		vals = vals.Data.cdr
+		vars = cdr(vars)
+		vals = cdr(vals)
 	}
 	addBinding(avar, aval, frame)
 }

@@ -2,6 +2,7 @@ package eval
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -60,6 +61,29 @@ func isAssign(exp *Object) bool {
 	}
 }
 
+func isDef(exp *Object) bool {
+	if isTaggedWith(exp, Define_Symbol) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func defVar(exp *Object) (*Object, error) {
+	if isSymbol(cadr(exp)) {
+		return cadr(exp), nil
+	}
+	return nil, errors.New("defvar target is not symbol")
+}
+
+func defVal(exp *Object) (*Object, error) {
+	if isSymbol(cadr(exp)) {
+		left := cdr(cdr(exp))
+		return car(left), nil
+	}
+	return nil, errors.New("defval failed")
+}
+
 func listValues(exp *Object, env *Object) *Object {
 	if isEmptyList(exp) {
 		return The_EmptyList
@@ -73,6 +97,34 @@ func listValues(exp *Object, env *Object) *Object {
 	}
 }
 
+func evalAssign(exp *Object, env *Object) (*Object, error) {
+	_var := cadr(exp)
+	_val, err := eval(car(cdr(cdr(exp))), env)
+	if err != nil {
+		return nil, err
+	}
+	defineVar(_var, _val, env)
+	return OK_Symbol, nil
+}
+
+func evalDef(exp *Object, env *Object) (*Object, error) {
+	var _var, _val *Object
+	var err error
+	_var, err = defVar(exp)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	_val, err = defVal(exp)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	_val, _ = eval(_val, env)
+	defineVar(_var, _val, env)
+	return OK_Symbol, nil
+}
+
 func eval(exp *Object, env *Object) (*Object, error) {
 	if isSelfEval(exp) {
 		return exp, nil
@@ -81,13 +133,9 @@ func eval(exp *Object, env *Object) (*Object, error) {
 	} else if isQuoted(exp) {
 		return cadr(exp), nil
 	} else if isAssign(exp) {
-		_var := cadr(exp)
-		_val, err := eval(car(cdr(cdr(exp))), env)
-		if err != nil {
-			return nil, err
-		}
-		defineVar(_var, _val, env)
-		return OK_Symbol, nil
+		return evalAssign(exp, env)
+	} else if isDef(exp) {
+		return evalDef(exp, env)
 	} else if isApp(exp) {
 		proc, err := eval(car(exp), env)
 		if err != nil {

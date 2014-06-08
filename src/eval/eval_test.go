@@ -12,6 +12,24 @@ func evalWrapper(buf string) (*Object, error) {
 	}
 }
 
+func TestEvalDef(t *testing.T) {
+	res, _ := evalWrapper("(define a 1)")
+	if res != OK_Symbol {
+		t.Error("define error")
+	}
+
+	res, _ = evalWrapper("(cons (define a 2) a)")
+	if isPair(res) {
+		val := cdr(res)
+		if !(isFixNum(val) &&
+			val.Data.fixNum == 2) {
+			t.Error("define failed")
+		}
+	} else {
+		t.Error("not pair")
+	}
+}
+
 func TestEvalSet(t *testing.T) {
 	res, _ := evalWrapper("(set! a 1)")
 	if res != OK_Symbol {
