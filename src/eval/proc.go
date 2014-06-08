@@ -17,7 +17,7 @@ func isPrimitiveProc(obj *Object) bool {
 }
 
 func isNullProc(args *Object) *Object {
-	if isEmptyList(args) {
+	if isEmptyList(car(args)) {
 		return The_True
 	} else {
 		return The_False

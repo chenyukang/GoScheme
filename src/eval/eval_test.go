@@ -70,4 +70,18 @@ func TestEvalProc(t *testing.T) {
 		res.Data.fixNum == 0) {
 		t.Error("* error")
 	}
+
+	res, _ = evalWrapper("(null? ())")
+	if res != The_True {
+		t.Error("null? failed")
+	}
+	res, _ = evalWrapper("(boolean? #t)")
+	if res != The_True {
+		t.Error("boolean? failed")
+	}
+	res, _ = evalWrapper("(integer? 1)")
+	if res != The_True {
+		t.Error("integer? failed")
+	}
+
 }
