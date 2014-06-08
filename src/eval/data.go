@@ -142,6 +142,14 @@ func isPair(obj *Object) bool {
 	return obj.Type == PAIR
 }
 
+func isLast(obj *Object) bool {
+	if isEmptyList(cdr(obj)) {
+		return true
+	} else {
+		return false
+	}
+}
+
 func setCar(pair *Object, obj *Object) {
 	pair.Data.car = obj
 }

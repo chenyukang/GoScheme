@@ -98,3 +98,27 @@ func TestEvalIf(t *testing.T) {
 		t.Error("if failed")
 	}
 }
+
+func TestEvalLogical(t *testing.T) {
+	res, _ := evalWrapper("(or #t #t #f)")
+	if !equal(res, The_True) {
+		t.Error("logical error")
+	}
+	res, _ = evalWrapper("(or #f #f #f #f)")
+	if !equal(res, The_False) {
+		t.Error("logical error")
+	}
+	res, _ = evalWrapper("(and #f #t #t)")
+	if !equal(res, The_False) {
+		t.Error("logical error")
+	}
+	res, _ = evalWrapper("(and #t #t #t)")
+	if !equal(res, The_True) {
+		t.Error("logical error")
+	}
+
+	res, _ = evalWrapper("(and (= 1 1) (= 2 2)")
+	if !equal(res, The_True) {
+		t.Error("logical error")
+	}
+}

@@ -69,6 +69,22 @@ func isDef(exp *Object) bool {
 	}
 }
 
+func isAnd(exp *Object) bool {
+	if isTaggedWith(exp, And_Symbol) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func isOr(exp *Object) bool {
+	if isTaggedWith(exp, Or_Symbol) {
+		return true
+	} else {
+		return false
+	}
+}
+
 func defVar(exp *Object) (*Object, error) {
 	if isSymbol(cadr(exp)) {
 		return cadr(exp), nil
@@ -149,6 +165,55 @@ func evalIf(exp *Object, env *Object) (*Object, error) {
 	}
 }
 
+func evalAnd(exp *Object, env *Object) (*Object, error) {
+	tests := cdr(exp)
+	if isEmptyList(tests) {
+		return The_True, nil
+	}
+	for {
+		if isLast(tests) {
+			break
+		}
+		res, _ := eval(car(tests), env)
+		if isFalse(res) {
+			return The_False, nil
+		}
+		tests = cdr(tests)
+	}
+	return eval(car(tests), env)
+}
+
+func evalOr(exp *Object, env *Object) (*Object, error) {
+	tests := cdr(exp)
+	if isEmptyList(tests) {
+		return The_True, nil
+	}
+	for {
+		if isLast(tests) {
+			break
+		}
+		res, _ := eval(car(tests), env)
+		if isTrue(res) {
+			return The_True, nil
+		}
+		tests = cdr(tests)
+	}
+	return eval(car(tests), env)
+}
+
+func evalApp(exp *Object, env *Object) (*Object, error) {
+	proc, err := eval(car(exp), env)
+	if err != nil {
+		return nil, err
+	}
+	args := listValues(cdr(exp), env)
+	if isPrimitiveProc(proc) {
+		val := proc.Data.primitive(args)
+		return val, nil
+	}
+	return nil, errors.New("not implemented")
+}
+
 func eval(exp *Object, env *Object) (*Object, error) {
 	if isSelfEval(exp) {
 		return exp, nil
@@ -162,16 +227,12 @@ func eval(exp *Object, env *Object) (*Object, error) {
 		return evalDef(exp, env)
 	} else if isIf(exp) {
 		return evalIf(exp, env)
+	} else if isAnd(exp) {
+		return evalAnd(exp, env)
+	} else if isOr(exp) {
+		return evalOr(exp, env)
 	} else if isApp(exp) {
-		proc, err := eval(car(exp), env)
-		if err != nil {
-			return nil, err
-		}
-		args := listValues(cdr(exp), env)
-		if isPrimitiveProc(proc) {
-			val := proc.Data.primitive(args)
-			return val, nil
-		}
+		return evalApp(exp, env)
 	}
 	return exp, nil
 }
