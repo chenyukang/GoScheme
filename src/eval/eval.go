@@ -93,14 +93,6 @@ func isCond(exp *Object) bool {
 	}
 }
 
-func isCondElse(exp *Object) bool {
-	if isTaggedWith(exp, Else_Symbol) {
-		return true
-	} else {
-		return false
-	}
-}
-
 func defVar(exp *Object) (*Object, error) {
 	if isSymbol(cadr(exp)) {
 		return cadr(exp), nil
