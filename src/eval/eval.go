@@ -84,6 +84,14 @@ func defVal(exp *Object) (*Object, error) {
 	return nil, errors.New("defval failed")
 }
 
+func isIf(exp *Object) bool {
+	if isTaggedWith(exp, If_Symbol) {
+		return true
+	} else {
+		return false
+	}
+}
+
 func listValues(exp *Object, env *Object) *Object {
 	if isEmptyList(exp) {
 		return The_EmptyList
@@ -125,6 +133,22 @@ func evalDef(exp *Object, env *Object) (*Object, error) {
 	return OK_Symbol, nil
 }
 
+func evalIf(exp *Object, env *Object) (*Object, error) {
+	pred := cadr(exp)
+	ifConsT := cadr(cdr(exp))
+	ifConsF := cdr(cdr(cdr(exp)))
+	res, _ := eval(pred, env)
+	if isTrue(res) {
+		return eval(ifConsT, env)
+	} else {
+		if isEmptyList(ifConsF) {
+			return The_False, nil
+		} else {
+			return eval(car(ifConsF), env)
+		}
+	}
+}
+
 func eval(exp *Object, env *Object) (*Object, error) {
 	if isSelfEval(exp) {
 		return exp, nil
@@ -136,6 +160,8 @@ func eval(exp *Object, env *Object) (*Object, error) {
 		return evalAssign(exp, env)
 	} else if isDef(exp) {
 		return evalDef(exp, env)
+	} else if isIf(exp) {
+		return evalIf(exp, env)
 	} else if isApp(exp) {
 		proc, err := eval(car(exp), env)
 		if err != nil {

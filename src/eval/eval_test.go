@@ -91,3 +91,10 @@ func TestEvalProc(t *testing.T) {
 		t.Error("list failed")
 	}
 }
+
+func TestEvalIf(t *testing.T) {
+	res, _ := evalWrapper("(if 1 1 2)")
+	if !equal(res, makeFixNum(1)) {
+		t.Error("if failed")
+	}
+}
