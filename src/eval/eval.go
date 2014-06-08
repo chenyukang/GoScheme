@@ -85,6 +85,22 @@ func isOr(exp *Object) bool {
 	}
 }
 
+func isCond(exp *Object) bool {
+	if isTaggedWith(exp, Cond_Symbol) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func isCondElse(exp *Object) bool {
+	if isTaggedWith(exp, Else_Symbol) {
+		return true
+	} else {
+		return false
+	}
+}
+
 func defVar(exp *Object) (*Object, error) {
 	if isSymbol(cadr(exp)) {
 		return cadr(exp), nil
@@ -201,6 +217,22 @@ func evalOr(exp *Object, env *Object) (*Object, error) {
 	return eval(car(tests), env)
 }
 
+func evalCond(exp *Object, env *Object) (*Object, error) {
+	conds := cadr(exp)
+	for {
+		if isEmptyList(conds) {
+			break
+		}
+		cur := car(conds)
+		val, _ := eval(car(cur), env)
+		if isTrue(val) || equal(val, Else_Symbol) {
+			return eval(cadr(cur), env)
+		}
+		conds = cdr(conds)
+	}
+	return The_True, nil
+}
+
 func evalApp(exp *Object, env *Object) (*Object, error) {
 	proc, err := eval(car(exp), env)
 	if err != nil {
@@ -231,9 +263,12 @@ func eval(exp *Object, env *Object) (*Object, error) {
 		return evalAnd(exp, env)
 	} else if isOr(exp) {
 		return evalOr(exp, env)
+	} else if isCond(exp) {
+		return evalCond(exp, env)
 	} else if isApp(exp) {
 		return evalApp(exp, env)
 	}
+
 	return exp, nil
 }
 

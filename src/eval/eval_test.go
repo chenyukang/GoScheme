@@ -122,3 +122,18 @@ func TestEvalLogical(t *testing.T) {
 		t.Error("logical error")
 	}
 }
+
+func TestEvalCond(t *testing.T) {
+	res, _ := evalWrapper("(cond ((#t 1) (#t 2)))")
+	if !equal(res, makeFixNum(1)) {
+		t.Error("cond failed")
+	}
+	res, _ = evalWrapper("(cond ((#f 1) (#t 2)))")
+	if !equal(res, makeFixNum(2)) {
+		t.Error("cond failed")
+	}
+	res, _ = evalWrapper("(cond ((#f 1) (#f 2) (else 3)))")
+	if !equal(res, makeFixNum(3)) {
+		t.Error("cond failed")
+	}
+}
