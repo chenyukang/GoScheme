@@ -131,7 +131,6 @@ func eval(exp *Object, env *Object) (*Object, error) {
 	} else if isVariable(exp) {
 		return lookupVar(exp, env)
 	} else if isQuoted(exp) {
-		fmt.Println("now haha")
 		return cadr(exp), nil
 	} else if isAssign(exp) {
 		return evalAssign(exp, env)
