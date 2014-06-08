@@ -133,12 +133,16 @@ func TestTrueFalse(t *testing.T) {
 func TestEverything(t *testing.T) {
 	Init()
 	res := cons(OK_Symbol, If_Symbol)
-	if !(isPair(res) && car(res) == OK_Symbol && cdr(res) == If_Symbol) {
+	if !(isPair(res) &&
+		car(res) == OK_Symbol &&
+		cdr(res) == If_Symbol) {
 		t.Error("should be equal on cdr")
 	}
 	setCar(res, If_Symbol)
 	setCdr(res, OK_Symbol)
-	if !(isPair(res) && car(res) == If_Symbol && cdr(res) == OK_Symbol) {
+	if !(isPair(res) &&
+		car(res) == If_Symbol &&
+		cdr(res) == OK_Symbol) {
 		t.Error("should be equal on cdr")
 	}
 }
