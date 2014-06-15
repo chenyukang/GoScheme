@@ -1,15 +1,17 @@
 package eval
 
-import "errors"
-
-type ObjType int
+import (
+	"errors"
+	"reflect"
+	"unsafe"
+)
 
 const (
 	UNDEF = iota
 	EMPTY_LIST
 	BOOLEAN
 	SYMBOL
-	FIXNUM
+	INT
 	CHARACTER
 	STRING
 	PAIR
@@ -20,129 +22,193 @@ const (
 	EOF_OBJECT
 )
 
-type ObjFun func(args *Object) *Object
+type ObjType int
+type Object interface{}
+type ObjFun func(args Object) Object
 
-// For lack of union type in golang, ObjData will use for all type values
-// Not effecient in memory now.
-type ObjData struct {
-	boolean int
-	str     string
-	symbol  string
-	fixNum  int
-	char    byte
+var SymbolTable map[string]Object
+var The_EmptyList, The_True, The_False Object
+var The_Empty_Env, The_Global_Env Object
+var Set_Symbol, OK_Symbol, If_Symbol, Else_Symbol Object
+var Cond_Symbol, Or_Symbol, And_Symbol, Quote_Symbol, Lambda_Symbol Object
+var Define_Symbol, Begin_Symbol, Let_Symbol, Eof_Symbol Object
 
-	//pair data
-	car *Object
-	cdr *Object
-
-	//primitive proc
-	primitive ObjFun
-
-	compond_params *Object
-	compond_body   *Object
-	compond_env    *Object
+type Int struct {
+	Type  int
+	Value int64
 }
 
-func assert(exp bool, msg string) {
-	if exp == false {
-		panic(msg)
-	}
+type Str struct {
+	Type  int
+	Value string
 }
 
-type Object struct {
-	Type ObjType
-	Data ObjData
+type Bool struct {
+	Type  int
+	Value int
 }
 
-func allocObject() *Object {
-	obj := &Object{Type: UNDEF}
-	return obj
+type Pair struct {
+	Type int
+	Car  Object
+	Cdr  Object
 }
 
-var SymbolTable map[string]*Object
+type Symbol struct {
+	Type  int
+	Value string
+}
 
-var The_EmptyList, The_True, The_False *Object
-var The_Empty_Env, The_Global_Env *Object
-var Set_Symbol, OK_Symbol, If_Symbol, Else_Symbol *Object
-var Cond_Symbol, Or_Symbol, And_Symbol, Quote_Symbol, Lambda_Symbol *Object
-var Define_Symbol, Begin_Symbol, Let_Symbol, Eof_Symbol *Object
+type Char struct {
+	Type  int
+	Value byte
+}
 
-func makeSymbol(sym string) *Object {
+type Proc struct {
+	Type  int
+	Value ObjFun
+}
+
+type EmptyList struct {
+	Type int
+}
+
+func typeOf(obj Object) int {
+	s := reflect.ValueOf(obj).Elem()
+	return int(s.FieldByName("Type").Int())
+}
+
+func makeSymbol(sym string) Object {
 	if obj, ok := SymbolTable[sym]; ok {
 		return obj
 	}
-	obj := allocObject()
-	obj.Type = SYMBOL
-	obj.Data.symbol = sym
+	obj := &Symbol{SYMBOL, sym}
 	SymbolTable[sym] = obj
 	return obj
 }
 
-func makeBoolean(val int) *Object {
-	obj := allocObject()
-	obj.Type = BOOLEAN
-	obj.Data.boolean = val
-	return obj
+func makeEmptyList() Object {
+	return &EmptyList{EMPTY_LIST}
 }
 
-func makeFixNum(val int) *Object {
-	obj := allocObject()
-	obj.Type = FIXNUM
-	obj.Data.fixNum = val
-	return obj
+func makeBoolean(val int) Object {
+	return &Bool{BOOLEAN, val}
 }
 
-func makeChar(char byte) *Object {
-	obj := allocObject()
-	obj.Type = CHARACTER
-	obj.Data.char = char
-	return obj
+func makeInt(val int64) Object {
+	return &Int{INT, val}
 }
 
-func makeString(str string) *Object {
-	obj := allocObject()
-	obj.Type = STRING
-	obj.Data.str = str
-	return obj
+func makeStr(val string) Object {
+	return &Str{STRING, val}
 }
 
-func isSymbol(obj *Object) bool {
-	return obj.Type == SYMBOL
+func makeChar(val byte) Object {
+	return &Char{CHARACTER, val}
 }
 
-func isString(obj *Object) bool {
-	return obj.Type == STRING
+func makePrimitiveProc(fun ObjFun) Object {
+	return &Proc{PRIMITIVE_PROC, fun}
 }
 
-func isBoolean(obj *Object) bool {
-	return obj.Type == BOOLEAN
+func isSymbol(obj Object) bool {
+	return typeOf(obj) == SYMBOL
 }
 
-func isFalse(obj *Object) bool {
+func isStr(obj Object) bool {
+	return typeOf(obj) == STRING
+}
+
+func isBool(obj Object) bool {
+	return typeOf(obj) == BOOLEAN
+}
+
+func isFalse(obj Object) bool {
 	return obj == The_False
 }
 
-func isTrue(obj *Object) bool {
+func isTrue(obj Object) bool {
 	return !isFalse(obj)
 }
 
-func isChar(obj *Object) bool {
-	return obj.Type == CHARACTER
+func isChar(obj Object) bool {
+	return typeOf(obj) == CHARACTER
 }
 
-func isEmptyList(obj *Object) bool {
-	return obj.Type == EMPTY_LIST
+func isEmptyList(obj Object) bool {
+	return typeOf(obj) == EMPTY_LIST
 }
 
-func isFixNum(obj *Object) bool {
-	return obj.Type == FIXNUM
+func isInt(obj Object) bool {
+	return typeOf(obj) == INT
 }
 
-func isPair(obj *Object) bool {
-	return obj.Type == PAIR
+func isPair(obj Object) bool {
+	return typeOf(obj) == PAIR
 }
 
-func isLast(obj *Object) bool {
+func isPrimitiveProc(obj Object) bool {
+	return typeOf(obj) == PRIMITIVE_PROC
+}
+
+func fieldOf(obj Object, field string) Object {
+	v := reflect.ValueOf(obj).Elem()
+	return v.FieldByName(field).Interface()
+}
+
+func valueOf(m Object) reflect.Value {
+	s := reflect.ValueOf(m).Elem()
+	return s.FieldByName("Value")
+}
+
+func asInt(m Object) int64 {
+	return valueOf(m).Int()
+}
+
+func asStr(m Object) string {
+	return valueOf(m).String()
+}
+
+func asSym(m Object) string {
+	return valueOf(m).String()
+}
+
+func asChar(m Object) byte {
+	i := valueOf(m).Interface()
+	return i.(byte)
+}
+
+func asFunc(m Object) ObjFun {
+	i := valueOf(m).Interface()
+	return i.(ObjFun)
+}
+
+func setField(obj Object, t Object, field string) {
+	v := reflect.ValueOf(obj).Elem()
+	v.FieldByName(field).SetPointer(t.(unsafe.Pointer))
+}
+
+func setCar(obj Object, t Object) {
+	setField(obj, t, "Car")
+}
+
+func setCdr(obj Object, t Object) {
+	setField(obj, t, "Cdr")
+}
+
+func car(obj Object) Object {
+	return fieldOf(obj, "Car")
+}
+
+func cdr(obj Object) Object {
+	return fieldOf(obj, "Cdr")
+}
+
+func cons(car Object, cdr Object) Object {
+	return &Pair{PAIR, car, cdr}
+}
+
+func isLast(obj Object) bool {
 	if isEmptyList(cdr(obj)) {
 		return true
 	} else {
@@ -150,74 +216,50 @@ func isLast(obj *Object) bool {
 	}
 }
 
-func setCar(pair *Object, obj *Object) {
-	pair.Data.car = obj
-}
-
-func setCdr(pair *Object, obj *Object) {
-	pair.Data.cdr = obj
-}
-
-func car(pair *Object) *Object {
-	return pair.Data.car
-}
-
-func cdr(pair *Object) *Object {
-	return pair.Data.cdr
-}
-
-func cons(car *Object, cdr *Object) *Object {
-	obj := allocObject()
-	obj.Type = PAIR
-	obj.Data.car = car
-	obj.Data.cdr = cdr
-	return obj
-}
-
-func makeFrame(vars *Object, vals *Object) *Object {
+func makeFrame(vars Object, vals Object) Object {
 	return cons(vars, vals)
 }
 
-func frameVars(frame *Object) *Object {
-	return frame.Data.car
+func frameVars(frame Object) Object {
+	return car(frame)
 }
 
-func frameVals(frame *Object) *Object {
-	return frame.Data.cdr
+func frameVals(frame Object) Object {
+	return cdr(frame)
 }
 
-func extendEnv(vars *Object, vals *Object, baseEnv *Object) *Object {
+func extendEnv(vars Object, vals Object, baseEnv Object) Object {
 	return cons(makeFrame(vars, vals), baseEnv)
 }
 
-func addBinding(avar *Object, aval *Object, frame *Object) {
-	frame.Data.car = cons(avar, car(frame))
-	frame.Data.cdr = cons(aval, cdr(frame))
+func addBinding(avar Object, aval Object, frame Object) {
+	setCar(frame, cons(avar, car(frame)))
+	setCdr(frame, cons(aval, cdr(frame)))
 }
 
-func firstFrame(env *Object) *Object {
-	return env.Data.car
+func firstFrame(env Object) Object {
+	return car(env)
 }
 
-func lookupVar(avar *Object, env *Object) (*Object, error) {
+func lookupVar(avar Object, env Object) (Object, error) {
 	e := env
 	for !isEmptyList(e) {
 		frame := firstFrame(env)
 		vars := frameVars(frame)
 		vals := frameVals(frame)
 		for !isEmptyList(vars) {
-			if avar == vars.Data.car {
-				return vals.Data.car, nil
+			if avar == car(vars) {
+				return car(vals), nil
 			}
-			vars = vars.Data.cdr
-			vals = vals.Data.cdr
+			vars = cdr(vars)
+			vals = cdr(vals)
 		}
-		e = e.Data.cdr
+		e = cdr(e)
 	}
 	return nil, errors.New("undef variable")
 }
 
-func defineVar(avar *Object, aval *Object, env *Object) {
+func defineVar(avar Object, aval Object, env Object) {
 	frame := firstFrame(env)
 	vars := car(frame)
 	vals := cdr(frame)

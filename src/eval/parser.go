@@ -68,7 +68,7 @@ func eatWhiteSpace(reader *bufio.Reader) {
 
 }
 
-func readChar(reader *bufio.Reader) *Object {
+func readChar(reader *bufio.Reader) Object {
 	c, err := reader.ReadByte()
 	if err != nil {
 		panic("incomplete char literal\n")
@@ -109,7 +109,7 @@ func isInitial(val byte) bool {
 	}
 }
 
-func readPair(reader *bufio.Reader) *Object {
+func readPair(reader *bufio.Reader) Object {
 	eatWhiteSpace(reader)
 	c := readc(reader)
 	if c == ')' {
@@ -128,7 +128,7 @@ func readPair(reader *bufio.Reader) *Object {
 	return nil
 }
 
-func read(reader *bufio.Reader) *Object {
+func read(reader *bufio.Reader) Object {
 	eatWhiteSpace(reader)
 	c, _ := reader.ReadByte()
 	if c == '#' {
@@ -163,7 +163,7 @@ func read(reader *bufio.Reader) *Object {
 		num *= sign
 		if isDelimiter(n) {
 			reader.UnreadByte()
-			return makeFixNum(num)
+			return makeInt(int64(num))
 		} else {
 			panic("number not followed by delimiter\n")
 		}
@@ -176,7 +176,7 @@ func read(reader *bufio.Reader) *Object {
 			}
 			buf += string(n)
 		}
-		return makeString(buf)
+		return makeStr(buf)
 	} else if isInitial(c) {
 		n := c
 		buf := string(c)
@@ -200,14 +200,14 @@ func read(reader *bufio.Reader) *Object {
 	return nil
 }
 
-func writePair(obj *Object) {
+func writePair(obj Object) {
 	carObj := car(obj)
 	cdrObj := cdr(obj)
 	write(carObj)
-	if cdrObj.Type == PAIR {
+	if typeOf(cdrObj) == PAIR {
 		fmt.Fprintf(os.Stderr, " ")
 		writePair(cdrObj)
-	} else if cdrObj.Type == EMPTY_LIST {
+	} else if typeOf(cdrObj) == EMPTY_LIST {
 		return
 	} else {
 		fmt.Fprintf(os.Stderr, " . ")
@@ -215,8 +215,9 @@ func writePair(obj *Object) {
 	}
 }
 
-func write(obj *Object) {
-	switch obj.Type {
+func write(obj Object) {
+	_type := typeOf(obj)
+	switch _type {
 	case BOOLEAN:
 		if isFalse(obj) {
 			fmt.Fprintf(os.Stderr, "#f")
@@ -226,9 +227,9 @@ func write(obj *Object) {
 	case EMPTY_LIST:
 		fmt.Fprintf(os.Stderr, "()")
 	case SYMBOL:
-		fmt.Fprintf(os.Stderr, "%s", obj.Data.symbol)
+		fmt.Fprintf(os.Stderr, "%s", asSym(obj))
 	case CHARACTER:
-		c := obj.Data.char
+		c := asChar(obj)
 		fmt.Fprintf(os.Stderr, "#\\")
 		switch c {
 		case '\n':
@@ -238,10 +239,10 @@ func write(obj *Object) {
 		default:
 			fmt.Fprintf(os.Stderr, "%c", c)
 		}
-	case FIXNUM:
-		fmt.Fprintf(os.Stderr, "%d", obj.Data.fixNum)
+	case INT:
+		fmt.Fprintf(os.Stderr, "%d", asInt(obj))
 	case STRING:
-		fmt.Fprintf(os.Stderr, "\"%s\"", obj.Data.str)
+		fmt.Fprintf(os.Stderr, "\"%s\"", asStr(obj))
 	case PAIR:
 		fmt.Fprintf(os.Stderr, "(")
 		writePair(obj)

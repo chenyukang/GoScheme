@@ -5,18 +5,7 @@ import (
 	"os"
 )
 
-func makePrimitiveProc(fun ObjFun) *Object {
-	obj := allocObject()
-	obj.Type = PRIMITIVE_PROC
-	obj.Data.primitive = fun
-	return obj
-}
-
-func isPrimitiveProc(obj *Object) bool {
-	return obj.Type == PRIMITIVE_PROC
-}
-
-func isNullProc(args *Object) *Object {
+func isNullProc(args Object) Object {
 	if isEmptyList(car(args)) {
 		return The_True
 	} else {
@@ -24,15 +13,15 @@ func isNullProc(args *Object) *Object {
 	}
 }
 
-func isBooleanProc(args *Object) *Object {
-	if isBoolean(car(args)) {
+func isBooleanProc(args Object) Object {
+	if isBool(car(args)) {
 		return The_True
 	} else {
 		return The_False
 	}
 }
 
-func isSymbolProc(args *Object) *Object {
+func isSymbolProc(args Object) Object {
 	if isSymbol(car(args)) {
 		return The_True
 	} else {
@@ -40,15 +29,15 @@ func isSymbolProc(args *Object) *Object {
 	}
 }
 
-func isIntegerProc(args *Object) *Object {
-	if isFixNum(car(args)) {
+func isIntegerProc(args Object) Object {
+	if isInt(car(args)) {
 		return The_True
 	} else {
 		return The_False
 	}
 }
 
-func isCharProc(args *Object) *Object {
+func isCharProc(args Object) Object {
 	if isChar(car(args)) {
 		return The_True
 	} else {
@@ -56,15 +45,15 @@ func isCharProc(args *Object) *Object {
 	}
 }
 
-func isStringProc(args *Object) *Object {
-	if isString(car(args)) {
+func isStringProc(args Object) Object {
+	if isStr(car(args)) {
 		return The_True
 	} else {
 		return The_False
 	}
 }
 
-func isPairProc(args *Object) *Object {
+func isPairProc(args Object) Object {
 	if isPair(car(args)) {
 		return The_True
 	} else {
@@ -72,24 +61,24 @@ func isPairProc(args *Object) *Object {
 	}
 }
 
-func listProce(args *Object) *Object {
+func listProce(args Object) Object {
 	return args
 }
 
-func addProcedure(name string, fun ObjFun, env *Object) {
+func addProcedure(name string, fun ObjFun, env Object) {
 	defineVar(makeSymbol(name),
 		makePrimitiveProc(fun),
 		env)
 }
 
-func isNumEqualProc(args *Object) *Object {
-	value := (car(args)).Data.fixNum
+func isNumEqualProc(args Object) Object {
+	value := asInt(car(args))
 	args = cdr(args)
 	for {
 		if isEmptyList(args) {
 			break
 		}
-		if value != (car(args)).Data.fixNum {
+		if value != asInt(car(args)) {
 			return The_False
 		}
 		args = cdr(args)
@@ -97,14 +86,14 @@ func isNumEqualProc(args *Object) *Object {
 	return The_True
 }
 
-func isLessProc(args *Object) *Object {
-	value := (car(args)).Data.fixNum
+func isLessProc(args Object) Object {
+	value := asInt(car(args))
 	args = cdr(args)
 	for {
 		if isEmptyList(args) {
 			break
 		}
-		if value >= (car(args)).Data.fixNum {
+		if value >= asInt(car(args)) {
 			return The_False
 		}
 		args = cdr(args)
@@ -112,14 +101,14 @@ func isLessProc(args *Object) *Object {
 	return The_True
 }
 
-func isLargerProc(args *Object) *Object {
-	value := (car(args)).Data.fixNum
+func isLargerProc(args Object) Object {
+	value := asInt(car(args))
 	args = cdr(args)
 	for {
 		if isEmptyList(args) {
 			break
 		}
-		if value <= (car(args)).Data.fixNum {
+		if value <= asInt(car(args)) {
 			return The_False
 		}
 		args = cdr(args)
@@ -127,117 +116,118 @@ func isLargerProc(args *Object) *Object {
 	return The_True
 }
 
-func addProc(args *Object) *Object {
-	res := 0
+func addProc(args Object) Object {
+	res := int64(0)
 	for {
 		if isEmptyList(args) {
 			break
 		}
-		res += (car(args)).Data.fixNum
+		res += asInt(car(args))
 		args = cdr(args)
 	}
-	return makeFixNum(res)
+	return makeInt(res)
 }
 
-func subProc(args *Object) *Object {
-	res := (car(args)).Data.fixNum
+func subProc(args Object) Object {
+	res := asInt(car(args))
 	args = cdr(args)
 	for {
 		if isEmptyList(args) {
 			break
 		}
-		res -= (car(args)).Data.fixNum
+		res -= asInt(car(args))
 		args = cdr(args)
 	}
-	return makeFixNum(res)
+	return makeInt(res)
 }
 
-func mulProc(args *Object) *Object {
-	res := 1
+func mulProc(args Object) Object {
+	res := int64(1)
 	for {
 		if isEmptyList(args) {
 			break
 		}
-		res *= (car(args)).Data.fixNum
+		res *= asInt(car(args))
 		args = cdr(args)
 	}
-	return makeFixNum(res)
+	return makeInt(res)
 }
 
-func divProc(args *Object) *Object {
-	res := (car(args)).Data.fixNum
+func divProc(args Object) Object {
+	res := asInt(car(args))
 	args = cdr(args)
 	for {
 		if isEmptyList(args) {
 			break
 		}
-		next := (car(args)).Data.fixNum
+		next := asInt(car(args))
 		if next == 0 {
 			panic("divide zero")
 		}
 		res /= next
 		args = cdr(args)
 	}
-	return makeFixNum(res)
+	return makeInt(res)
 }
 
-func cadr(obj *Object) *Object {
+func cadr(obj Object) Object {
 	return car(cdr(obj))
 }
 
-func caar(obj *Object) *Object {
+func caar(obj Object) Object {
 	return car(car(obj))
 }
 
-func cdar(obj *Object) *Object {
+func cdar(obj Object) Object {
 	return cdr(car(obj))
 }
 
-func consProc(args *Object) *Object {
+func consProc(args Object) Object {
 	return cons(car(args), cadr(args))
 }
 
-func carProc(args *Object) *Object {
+func carProc(args Object) Object {
 	return caar(args)
 }
 
-func cdrProc(args *Object) *Object {
+func cdrProc(args Object) Object {
 	return cdar(args)
 }
 
-func setcarProc(args *Object) *Object {
+func setcarProc(args Object) Object {
 	setCar(car(args), cadr(args))
 	return OK_Symbol
 }
 
-func setcdrProc(args *Object) *Object {
+func setcdrProc(args Object) Object {
 	setCdr(car(args), cadr(args))
 	return OK_Symbol
 }
 
-func listProc(args *Object) *Object {
+func listProc(args Object) Object {
 	return args
 }
 
-func equal(obj1 *Object, obj2 *Object) bool {
-	if obj1.Type != obj2.Type {
+func equal(obj1 Object, obj2 Object) bool {
+	type1, type2 := typeOf(obj1), typeOf(obj2)
+	if type1 != type2 {
 		return false
 	}
-	switch obj1.Type {
-	case FIXNUM:
-		if obj1.Data.fixNum == obj2.Data.fixNum {
+	switch type1 {
+	case INT:
+		if asInt(obj1) == asInt(obj2) {
 			return true
 		} else {
 			return false
 		}
 	case CHARACTER:
-		if obj1.Data.char == obj2.Data.char {
+		if asChar(obj1) == asChar(obj2) {
 			return true
 		} else {
 			return false
 		}
 	case STRING:
-		if obj1.Data.str == obj2.Data.str {
+		if asStr(obj1) == asStr(obj2) {
 			return true
 		} else {
 			return false
@@ -251,7 +241,7 @@ func equal(obj1 *Object, obj2 *Object) bool {
 	}
 }
 
-func eqProc(args *Object) *Object {
+func eqProc(args Object) Object {
 	obj1 := car(args)
 	obj2 := cadr(args)
 	if equal(obj1, obj2) {
@@ -261,7 +251,7 @@ func eqProc(args *Object) *Object {
 	}
 }
 
-func errorProc(args *Object) *Object {
+func errorProc(args Object) Object {
 	fmt.Println("Error:")
 	for {
 		if isEmptyList(args) {
@@ -274,12 +264,12 @@ func errorProc(args *Object) *Object {
 	return nil
 }
 
-func makeEnv() *Object {
+func makeEnv() Object {
 	env := extendEnv(The_EmptyList, The_EmptyList, The_Empty_Env)
 	return env
 }
 
-func setupEnv(env *Object) {
+func setupEnv(env Object) {
 	addProcedure("+", addProc, env)
 	addProcedure("-", subProc, env)
 	addProcedure("*", mulProc, env)
@@ -307,9 +297,8 @@ func setupEnv(env *Object) {
 }
 
 func Init() {
-	SymbolTable = make(map[string]*Object)
-	The_EmptyList = allocObject()
-	The_EmptyList.Type = EMPTY_LIST
+	SymbolTable = make(map[string]Object)
+	The_EmptyList = makeEmptyList()
 	The_True = makeBoolean(1)
 	The_False = makeBoolean(0)
 	Set_Symbol = makeSymbol("set!")

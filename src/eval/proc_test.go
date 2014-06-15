@@ -28,17 +28,17 @@ func TestSymbol(t *testing.T) {
 
 func TestFixNum(t *testing.T) {
 	Init()
-	fix := makeFixNum(1)
-	if !(isFixNum(fix) && fix.Data.fixNum == 1) {
+	fix := makeInt(1)
+	if !(isInt(fix) && asInt(fix) == 1) {
 		t.Error("fixNum val")
 	}
 }
 
 func TestAddProc(t *testing.T) {
 	Init()
-	arg1 := makeFixNum(1)
-	arg2 := makeFixNum(2)
-	arg3 := makeFixNum(3)
+	arg1 := makeInt(1)
+	arg2 := makeInt(2)
+	arg3 := makeInt(3)
 	args := cons(arg1,
 		cons(arg2,
 			cons(arg3, The_EmptyList)))
@@ -46,21 +46,22 @@ func TestAddProc(t *testing.T) {
 		t.Error("add proc")
 	}
 	res := addProc(args)
-	if res.Data.fixNum != 6 {
+	if asInt(res) == 6 {
 		t.Error("add proc fail")
 	}
 	primitive := makePrimitiveProc(addProc)
 	if isPrimitiveProc(primitive) == false {
 		t.Error("primitivie")
 	}
-	res = (primitive.Data.primitive)(args)
+	fu := asFunc(primitive)
+	res = fu(args)
 }
 
 func TestSubProc(t *testing.T) {
 	Init()
-	arg1 := makeFixNum(1)
-	arg2 := makeFixNum(2)
-	arg3 := makeFixNum(3)
+	arg1 := makeInt(1)
+	arg2 := makeInt(2)
+	arg3 := makeInt(3)
 	args := cons(arg1,
 		cons(arg2,
 			cons(arg3, The_EmptyList)))
@@ -68,35 +69,37 @@ func TestSubProc(t *testing.T) {
 		t.Error("sub proc")
 	}
 	res := subProc(args)
-	if !(isFixNum(res) && res.Data.fixNum == -4) {
+	if !(isInt(res) && asInt(res) == -4) {
 		t.Error("sub proc fail")
 	}
 	primitive := makePrimitiveProc(subProc)
 	if isPrimitiveProc(primitive) == false {
 		t.Error("primitivie")
 	}
-	res = (primitive.Data.primitive)(args)
-	if !(isFixNum(res) && res.Data.fixNum == -4) {
+	fu := asFunc(primitive)
+	res = fu(args)
+	if !(isInt(res) && asInt(res) == -4) {
 		t.Error("sub proc fail")
 	}
 }
 
 func TestDiv(t *testing.T) {
 	Init()
-	arg1 := makeFixNum(4)
-	arg2 := makeFixNum(2)
+	arg1 := makeInt(4)
+	arg2 := makeInt(2)
 	args := cons(arg1,
 		cons(arg2, The_EmptyList))
 	res := divProc(args)
-	if !(isFixNum(res) && res.Data.fixNum == 2) {
+	if !(isInt(res) && asInt(res) == 2) {
 		t.Error("div proc fail")
 	}
 	primitive := makePrimitiveProc(divProc)
 	if isPrimitiveProc(primitive) == false {
 		t.Error("primitivie")
 	}
-	res = (primitive.Data.primitive)(args)
-	if !(isFixNum(res) && res.Data.fixNum == 2) {
+	fu := asFunc(primitive)
+	res = fu(args)
+	if !(isInt(res) && asInt(res) == 2) {
 		t.Error("div proc fail")
 	}
 }
@@ -105,7 +108,7 @@ func TestChar(t *testing.T) {
 	Init()
 	char := makeChar('a')
 	if isChar(char) == false ||
-		char.Data.char != 'a' {
+		asChar(char) != 'a' {
 		t.Error("char error")
 	}
 }
@@ -113,9 +116,9 @@ func TestChar(t *testing.T) {
 func TestString(t *testing.T) {
 	Init()
 	val := "this is good"
-	str := makeString(val)
-	if isString(str) == false ||
-		str.Data.str != val {
+	str := makeStr(val)
+	if isStr(str) == false ||
+		asStr(str) != val {
 		t.Error("string error")
 	}
 }
@@ -151,15 +154,16 @@ func TestVarLookup(t *testing.T) {
 	Init()
 	sym := makeSymbol("+")
 	obj, _ := lookupVar(sym, The_Global_Env)
-	if !(obj.Type == PRIMITIVE_PROC &&
-		obj.Data.primitive != nil) {
+	if !(typeOf(obj) == PRIMITIVE_PROC &&
+		asFunc(obj) != nil) {
 		t.Error("varlookup")
 	}
-	var1 := makeFixNum(1)
-	var2 := makeFixNum(2)
+	var1 := makeInt(1)
+	var2 := makeInt(2)
 	args := cons(var1, cons(var2, The_EmptyList))
-	res := obj.Data.primitive(args)
-	if !(isFixNum(res) && res.Data.fixNum == 3) {
+	fu := asFunc(obj)
+	res := fu(args)
+	if !(isInt(res) && asInt(res) == 3) {
 		t.Error("varlookup error for addProc")
 	}
 }
