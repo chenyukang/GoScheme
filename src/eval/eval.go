@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func isApp(exp *Object) bool {
+func isApp(exp Object) bool {
 	if isPair(exp) {
 		return true
 	} else {
@@ -15,17 +15,17 @@ func isApp(exp *Object) bool {
 	}
 }
 
-func isSelfEval(exp *Object) bool {
-	if isBoolean(exp) ||
-		isFixNum(exp) ||
+func isSelfEval(exp Object) bool {
+	if isBool(exp) ||
+		isInt(exp) ||
 		isChar(exp) ||
-		isString(exp) {
+		isStr(exp) {
 		return true
 	}
 	return false
 }
 
-func isVariable(exp *Object) bool {
+func isVariable(exp Object) bool {
 	if isSymbol(exp) {
 		return true
 	} else {
@@ -33,7 +33,7 @@ func isVariable(exp *Object) bool {
 	}
 }
 
-func isTaggedWith(exp *Object, tag *Object) bool {
+func isTaggedWith(exp Object, tag Object) bool {
 	if isPair(exp) {
 		theCar := car(exp)
 		if isSymbol(theCar) && (theCar == tag) {
@@ -45,7 +45,7 @@ func isTaggedWith(exp *Object, tag *Object) bool {
 	return false
 }
 
-func isQuoted(exp *Object) bool {
+func isQuoted(exp Object) bool {
 	if isTaggedWith(exp, Quote_Symbol) {
 		return true
 	} else {
@@ -53,7 +53,7 @@ func isQuoted(exp *Object) bool {
 	}
 }
 
-func isAssign(exp *Object) bool {
+func isAssign(exp Object) bool {
 	if isTaggedWith(exp, Set_Symbol) {
 		return true
 	} else {
@@ -61,7 +61,7 @@ func isAssign(exp *Object) bool {
 	}
 }
 
-func isDef(exp *Object) bool {
+func isDef(exp Object) bool {
 	if isTaggedWith(exp, Define_Symbol) {
 		return true
 	} else {
@@ -69,7 +69,7 @@ func isDef(exp *Object) bool {
 	}
 }
 
-func isAnd(exp *Object) bool {
+func isAnd(exp Object) bool {
 	if isTaggedWith(exp, And_Symbol) {
 		return true
 	} else {
@@ -77,7 +77,7 @@ func isAnd(exp *Object) bool {
 	}
 }
 
-func isOr(exp *Object) bool {
+func isOr(exp Object) bool {
 	if isTaggedWith(exp, Or_Symbol) {
 		return true
 	} else {
@@ -85,7 +85,7 @@ func isOr(exp *Object) bool {
 	}
 }
 
-func isCond(exp *Object) bool {
+func isCond(exp Object) bool {
 	if isTaggedWith(exp, Cond_Symbol) {
 		return true
 	} else {
@@ -93,14 +93,14 @@ func isCond(exp *Object) bool {
 	}
 }
 
-func defVar(exp *Object) (*Object, error) {
+func defVar(exp Object) (Object, error) {
 	if isSymbol(cadr(exp)) {
 		return cadr(exp), nil
 	}
 	return nil, errors.New("defvar target is not symbol")
 }
 
-func defVal(exp *Object) (*Object, error) {
+func defVal(exp Object) (Object, error) {
 	if isSymbol(cadr(exp)) {
 		left := cdr(cdr(exp))
 		return car(left), nil
@@ -108,7 +108,7 @@ func defVal(exp *Object) (*Object, error) {
 	return nil, errors.New("defval failed")
 }
 
-func isIf(exp *Object) bool {
+func isIf(exp Object) bool {
 	if isTaggedWith(exp, If_Symbol) {
 		return true
 	} else {
@@ -116,7 +116,7 @@ func isIf(exp *Object) bool {
 	}
 }
 
-func listValues(exp *Object, env *Object) *Object {
+func listValues(exp Object, env Object) Object {
 	if isEmptyList(exp) {
 		return The_EmptyList
 	} else {
@@ -129,7 +129,7 @@ func listValues(exp *Object, env *Object) *Object {
 	}
 }
 
-func evalAssign(exp *Object, env *Object) (*Object, error) {
+func evalAssign(exp Object, env Object) (Object, error) {
 	_var := cadr(exp)
 	_val, err := eval(car(cdr(cdr(exp))), env)
 	if err != nil {
@@ -139,8 +139,8 @@ func evalAssign(exp *Object, env *Object) (*Object, error) {
 	return OK_Symbol, nil
 }
 
-func evalDef(exp *Object, env *Object) (*Object, error) {
-	var _var, _val *Object
+func evalDef(exp Object, env Object) (Object, error) {
+	var _var, _val Object
 	var err error
 	_var, err = defVar(exp)
 	if err != nil {
@@ -157,7 +157,7 @@ func evalDef(exp *Object, env *Object) (*Object, error) {
 	return OK_Symbol, nil
 }
 
-func evalIf(exp *Object, env *Object) (*Object, error) {
+func evalIf(exp Object, env Object) (Object, error) {
 	pred := cadr(exp)
 	ifConsT := cadr(cdr(exp))
 	ifConsF := cdr(cdr(cdr(exp)))
@@ -173,7 +173,7 @@ func evalIf(exp *Object, env *Object) (*Object, error) {
 	}
 }
 
-func evalAnd(exp *Object, env *Object) (*Object, error) {
+func evalAnd(exp Object, env Object) (Object, error) {
 	tests := cdr(exp)
 	if isEmptyList(tests) {
 		return The_True, nil
@@ -191,7 +191,7 @@ func evalAnd(exp *Object, env *Object) (*Object, error) {
 	return eval(car(tests), env)
 }
 
-func evalOr(exp *Object, env *Object) (*Object, error) {
+func evalOr(exp Object, env Object) (Object, error) {
 	tests := cdr(exp)
 	if isEmptyList(tests) {
 		return The_True, nil
@@ -209,7 +209,7 @@ func evalOr(exp *Object, env *Object) (*Object, error) {
 	return eval(car(tests), env)
 }
 
-func evalCond(exp *Object, env *Object) (*Object, error) {
+func evalCond(exp Object, env Object) (Object, error) {
 	conds := cadr(exp)
 	for {
 		if isEmptyList(conds) {
@@ -225,20 +225,21 @@ func evalCond(exp *Object, env *Object) (*Object, error) {
 	return The_True, nil
 }
 
-func evalApp(exp *Object, env *Object) (*Object, error) {
+func evalApp(exp Object, env Object) (Object, error) {
 	proc, err := eval(car(exp), env)
 	if err != nil {
 		return nil, err
 	}
 	args := listValues(cdr(exp), env)
 	if isPrimitiveProc(proc) {
-		val := proc.Data.primitive(args)
+		p := asFunc(proc)
+		val := p(args)
 		return val, nil
 	}
 	return nil, errors.New("not implemented")
 }
 
-func eval(exp *Object, env *Object) (*Object, error) {
+func eval(exp Object, env Object) (Object, error) {
 	if isSelfEval(exp) {
 		return exp, nil
 	} else if isVariable(exp) {

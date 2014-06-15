@@ -9,7 +9,7 @@ import (
 
 // write buf to a tmporary file,
 // use bufio.Reader as a parameter for parser
-func parserWrapper(buf string) (*Object, error) {
+func parserWrapper(buf string) (Object, error) {
 	fp, err := ioutil.TempFile("", "")
 	if err != nil {
 		panic(err)
@@ -28,8 +28,8 @@ func parserWrapper(buf string) (*Object, error) {
 func TestParserSymbol(t *testing.T) {
 	Init()
 	obj, _ := parserWrapper("demo")
-	if !(obj.Type == SYMBOL &&
-		obj.Data.symbol == "demo") {
+	if !(typeOf(obj) == SYMBOL &&
+		asSym(obj) == "demo") {
 		t.Error("parser")
 	}
 }
@@ -37,8 +37,7 @@ func TestParserSymbol(t *testing.T) {
 func TestParserInt(t *testing.T) {
 	Init()
 	obj, _ := parserWrapper("10")
-	if !(obj.Type == FIXNUM &&
-		obj.Data.fixNum == 10) {
+	if !(asInt(obj) == 10) {
 		t.Error("parser")
 	}
 }
@@ -46,8 +45,7 @@ func TestParserInt(t *testing.T) {
 func TestParserChar(t *testing.T) {
 	Init()
 	obj, _ := parserWrapper("#\\h")
-	if !(obj.Type == CHARACTER &&
-		obj.Data.char == 'h') {
+	if !(asChar(obj) == 'h') {
 		t.Error("parser character failed")
 	}
 }
@@ -60,15 +58,15 @@ func TestParserList(t *testing.T) {
 	}
 
 	obj, _ = parserWrapper("(1)")
-	if !(obj.Type == PAIR &&
-		equal(car(obj), makeFixNum(1)) &&
+	if !(typeOf(obj) == PAIR &&
+		equal(car(obj), makeInt(1)) &&
 		cdr(obj) == The_EmptyList) {
 		t.Error("parser list")
 	}
 
 	obj, _ = parserWrapper("(1 2)")
-	if !(obj.Type == PAIR &&
-		equal(cadr(obj), makeFixNum(2))) {
+	if !(typeOf(obj) == PAIR &&
+		equal(cadr(obj), makeInt(2))) {
 		t.Error("parser list")
 	}
 
@@ -76,15 +74,15 @@ func TestParserList(t *testing.T) {
 	obj = cdr(obj)
 	obj = cdr(obj)
 	obj = car(obj)
-	if !equal(obj, makeFixNum(3)) {
+	if !equal(obj, makeInt(3)) {
 		t.Error("parser list")
 	}
 
 	obj, _ = parserWrapper("(#t #f)")
 	tt := car(obj)
 	ff := cadr(obj)
-	if !(tt.Type == BOOLEAN && tt == The_True &&
-		ff.Type == BOOLEAN && ff == The_False) {
+	if !(typeOf(tt) == BOOLEAN && tt == The_True &&
+		typeOf(ff) == BOOLEAN && ff == The_False) {
 		t.Error("parser list : boolean")
 	}
 }

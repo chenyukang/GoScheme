@@ -2,7 +2,7 @@ package eval
 
 import "testing"
 
-func evalWrapper(buf string) (*Object, error) {
+func evalWrapper(buf string) (Object, error) {
 	Init()
 	obj, err := parserWrapper(buf)
 	if err == nil {
@@ -21,7 +21,7 @@ func TestEvalDef(t *testing.T) {
 	res, _ = evalWrapper("(cons (define a 2) a)")
 	if isPair(res) {
 		val := cdr(res)
-		if !equal(val, makeFixNum(2)) {
+		if !equal(val, makeInt(2)) {
 			t.Error("define failed")
 		}
 	} else {
@@ -38,8 +38,8 @@ func TestEvalSet(t *testing.T) {
 	res, _ = evalWrapper("(cons (set! a 2) a)")
 	if isPair(res) {
 		val := cdr(res)
-		if !(isFixNum(val) &&
-			val.Data.fixNum == 2) {
+		if !(isInt(val) &&
+			asInt(val) == 2) {
 			t.Error("set! failed")
 		}
 	} else {
@@ -54,16 +54,16 @@ func TestEvalProc(t *testing.T) {
 		t.Error("+ proc")
 	}
 	res, _ = evalWrapper("(+ 1 2)")
-	if !equal(res, makeFixNum(3)) {
+	if !equal(res, makeInt(3)) {
 		t.Error("+ error")
 	}
 	res, _ = evalWrapper("(+ (- 1 2) 1)")
-	if !(isFixNum(res) &&
-		res.Data.fixNum == 0) {
+	if !(isInt(res) &&
+		asInt(res) == 0) {
 		t.Error("+ error")
 	}
 	res, _ = evalWrapper("(* 10 (- 2 2))")
-	if !equal(res, makeFixNum(0)) {
+	if !equal(res, makeInt(0)) {
 		t.Error("* error")
 	}
 	res, _ = evalWrapper("(null? ())")
@@ -87,14 +87,14 @@ func TestEvalProc(t *testing.T) {
 
 	res, _ = evalWrapper("(list 1 2)")
 	if !(isPair(res) &&
-		equal(car(res), makeFixNum(1))) {
+		equal(car(res), makeInt(1))) {
 		t.Error("list failed")
 	}
 }
 
 func TestEvalIf(t *testing.T) {
 	res, _ := evalWrapper("(if 1 1 2)")
-	if !equal(res, makeFixNum(1)) {
+	if !equal(res, makeInt(1)) {
 		t.Error("if failed")
 	}
 }
@@ -125,15 +125,15 @@ func TestEvalLogical(t *testing.T) {
 
 func TestEvalCond(t *testing.T) {
 	res, _ := evalWrapper("(cond ((#t 1) (#t 2)))")
-	if !equal(res, makeFixNum(1)) {
+	if !equal(res, makeInt(1)) {
 		t.Error("cond failed")
 	}
 	res, _ = evalWrapper("(cond ((#f 1) (#t 2)))")
-	if !equal(res, makeFixNum(2)) {
+	if !equal(res, makeInt(2)) {
 		t.Error("cond failed")
 	}
 	res, _ = evalWrapper("(cond ((#f 1) (#f 2) (else 3)))")
-	if !equal(res, makeFixNum(3)) {
+	if !equal(res, makeInt(3)) {
 		t.Error("cond failed")
 	}
 }
