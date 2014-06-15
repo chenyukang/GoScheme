@@ -3,7 +3,6 @@ package eval
 import (
 	"errors"
 	"reflect"
-	"unsafe"
 )
 
 const (
@@ -185,15 +184,15 @@ func asFunc(m Object) ObjFun {
 
 func setField(obj Object, t Object, field string) {
 	v := reflect.ValueOf(obj).Elem()
-	v.FieldByName(field).SetPointer(t.(unsafe.Pointer))
+	v.FieldByName(field).Set(t.(reflect.Value))
 }
 
 func setCar(obj Object, t Object) {
-	setField(obj, t, "Car")
+	setField(obj, reflect.ValueOf(t), "Car")
 }
 
 func setCdr(obj Object, t Object) {
-	setField(obj, t, "Cdr")
+	setField(obj, reflect.ValueOf(t), "Cdr")
 }
 
 func car(obj Object) Object {

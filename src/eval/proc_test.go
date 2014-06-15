@@ -46,7 +46,7 @@ func TestAddProc(t *testing.T) {
 		t.Error("add proc")
 	}
 	res := addProc(args)
-	if asInt(res) == 6 {
+	if asInt(res) != 6 {
 		t.Error("add proc fail")
 	}
 	primitive := makePrimitiveProc(addProc)
