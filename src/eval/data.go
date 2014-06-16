@@ -23,14 +23,16 @@ const (
 
 type ObjType int
 type Object interface{}
-type ObjFun func(args Object) Object
+type ObjFun func(args Object) (Object, error)
 
 var SymbolTable map[string]Object
 var The_EmptyList, The_True, The_False Object
 var The_Empty_Env, The_Global_Env Object
-var Set_Symbol, OK_Symbol, If_Symbol, Else_Symbol Object
+var Set_Symbol, OK_Symbol, FAIL_Symbol, If_Symbol, Else_Symbol Object
 var Cond_Symbol, Or_Symbol, And_Symbol, Quote_Symbol, Lambda_Symbol Object
 var Define_Symbol, Begin_Symbol, Let_Symbol, Eof_Symbol Object
+
+//Use reflect ...
 
 type Int struct {
 	Type  int

@@ -45,7 +45,7 @@ func TestAddProc(t *testing.T) {
 	if isEmptyList(args) {
 		t.Error("add proc")
 	}
-	res := addProc(args)
+	res, _ := addProc(args)
 	if asInt(res) != 6 {
 		t.Error("add proc fail")
 	}
@@ -54,7 +54,7 @@ func TestAddProc(t *testing.T) {
 		t.Error("primitivie")
 	}
 	fu := asFunc(primitive)
-	res = fu(args)
+	res, _ = fu(args)
 }
 
 func TestSubProc(t *testing.T) {
@@ -68,7 +68,7 @@ func TestSubProc(t *testing.T) {
 	if isEmptyList(args) {
 		t.Error("sub proc")
 	}
-	res := subProc(args)
+	res, _ := subProc(args)
 	if !(isInt(res) && asInt(res) == -4) {
 		t.Error("sub proc fail")
 	}
@@ -77,7 +77,7 @@ func TestSubProc(t *testing.T) {
 		t.Error("primitivie")
 	}
 	fu := asFunc(primitive)
-	res = fu(args)
+	res, _ = fu(args)
 	if !(isInt(res) && asInt(res) == -4) {
 		t.Error("sub proc fail")
 	}
@@ -89,7 +89,7 @@ func TestDiv(t *testing.T) {
 	arg2 := makeInt(2)
 	args := cons(arg1,
 		cons(arg2, The_EmptyList))
-	res := divProc(args)
+	res, _ := divProc(args)
 	if !(isInt(res) && asInt(res) == 2) {
 		t.Error("div proc fail")
 	}
@@ -98,7 +98,7 @@ func TestDiv(t *testing.T) {
 		t.Error("primitivie")
 	}
 	fu := asFunc(primitive)
-	res = fu(args)
+	res, _ = fu(args)
 	if !(isInt(res) && asInt(res) == 2) {
 		t.Error("div proc fail")
 	}
@@ -162,7 +162,7 @@ func TestVarLookup(t *testing.T) {
 	var2 := makeInt(2)
 	args := cons(var1, cons(var2, The_EmptyList))
 	fu := asFunc(obj)
-	res := fu(args)
+	res, _ := fu(args)
 	if !(isInt(res) && asInt(res) == 3) {
 		t.Error("varlookup error for addProc")
 	}
@@ -170,13 +170,13 @@ func TestVarLookup(t *testing.T) {
 
 func TestIsProc_Family(t *testing.T) {
 	args := cons(The_True, The_EmptyList)
-	res := isBooleanProc(args)
+	res, _ := isBooleanProc(args)
 	if isTrue(res) == false {
 		t.Error("isBooleanProc error")
 	}
 	sym := makeSymbol("OK")
 	args = cons(sym, The_EmptyList)
-	res = isSymbolProc(args)
+	res, _ = isSymbolProc(args)
 	if isTrue(res) == false {
 		t.Error("isSymbolProc error")
 	}
