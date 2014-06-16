@@ -1,68 +1,69 @@
 package eval
 
 import (
+	"errors"
 	"fmt"
 	"os"
 )
 
-func isNullProc(args Object) Object {
+func isNullProc(args Object) (Object, error) {
 	if isEmptyList(car(args)) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func isBooleanProc(args Object) Object {
+func isBooleanProc(args Object) (Object, error) {
 	if isBool(car(args)) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func isSymbolProc(args Object) Object {
+func isSymbolProc(args Object) (Object, error) {
 	if isSymbol(car(args)) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func isIntegerProc(args Object) Object {
+func isIntegerProc(args Object) (Object, error) {
 	if isInt(car(args)) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func isCharProc(args Object) Object {
+func isCharProc(args Object) (Object, error) {
 	if isChar(car(args)) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func isStringProc(args Object) Object {
+func isStringProc(args Object) (Object, error) {
 	if isStr(car(args)) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func isPairProc(args Object) Object {
+func isPairProc(args Object) (Object, error) {
 	if isPair(car(args)) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func listProce(args Object) Object {
-	return args
+func listProce(args Object) (Object, error) {
+	return args, nil
 }
 
 func addProcedure(name string, fun ObjFun, env Object) {
@@ -71,7 +72,7 @@ func addProcedure(name string, fun ObjFun, env Object) {
 		env)
 }
 
-func isNumEqualProc(args Object) Object {
+func isNumEqualProc(args Object) (Object, error) {
 	value := asInt(car(args))
 	args = cdr(args)
 	for {
@@ -79,14 +80,14 @@ func isNumEqualProc(args Object) Object {
 			break
 		}
 		if value != asInt(car(args)) {
-			return The_False
+			return The_False, nil
 		}
 		args = cdr(args)
 	}
-	return The_True
+	return The_True, nil
 }
 
-func isLessProc(args Object) Object {
+func isLessProc(args Object) (Object, error) {
 	value := asInt(car(args))
 	args = cdr(args)
 	for {
@@ -94,14 +95,14 @@ func isLessProc(args Object) Object {
 			break
 		}
 		if value >= asInt(car(args)) {
-			return The_False
+			return The_False, nil
 		}
 		args = cdr(args)
 	}
-	return The_True
+	return The_True, nil
 }
 
-func isLargerProc(args Object) Object {
+func isLargerProc(args Object) (Object, error) {
 	value := asInt(car(args))
 	args = cdr(args)
 	for {
@@ -109,14 +110,14 @@ func isLargerProc(args Object) Object {
 			break
 		}
 		if value <= asInt(car(args)) {
-			return The_False
+			return The_False, nil
 		}
 		args = cdr(args)
 	}
-	return The_True
+	return The_True, nil
 }
 
-func addProc(args Object) Object {
+func addProc(args Object) (Object, error) {
 	res := int64(0)
 	for {
 		if isEmptyList(args) {
@@ -125,10 +126,10 @@ func addProc(args Object) Object {
 		res += asInt(car(args))
 		args = cdr(args)
 	}
-	return makeInt(res)
+	return makeInt(res), nil
 }
 
-func subProc(args Object) Object {
+func subProc(args Object) (Object, error) {
 	res := asInt(car(args))
 	args = cdr(args)
 	for {
@@ -138,10 +139,10 @@ func subProc(args Object) Object {
 		res -= asInt(car(args))
 		args = cdr(args)
 	}
-	return makeInt(res)
+	return makeInt(res), nil
 }
 
-func mulProc(args Object) Object {
+func mulProc(args Object) (Object, error) {
 	res := int64(1)
 	for {
 		if isEmptyList(args) {
@@ -150,10 +151,10 @@ func mulProc(args Object) Object {
 		res *= asInt(car(args))
 		args = cdr(args)
 	}
-	return makeInt(res)
+	return makeInt(res), nil
 }
 
-func divProc(args Object) Object {
+func divProc(args Object) (Object, error) {
 	res := asInt(car(args))
 	args = cdr(args)
 	for {
@@ -162,12 +163,12 @@ func divProc(args Object) Object {
 		}
 		next := asInt(car(args))
 		if next == 0 {
-			panic("divide zero")
+			return FAIL_Symbol, errors.New("divide zero")
 		}
 		res /= next
 		args = cdr(args)
 	}
-	return makeInt(res)
+	return makeInt(res), nil
 }
 
 func cadr(obj Object) Object {
@@ -182,30 +183,30 @@ func cdar(obj Object) Object {
 	return cdr(car(obj))
 }
 
-func consProc(args Object) Object {
-	return cons(car(args), cadr(args))
+func consProc(args Object) (Object, error) {
+	return cons(car(args), cadr(args)), nil
 }
 
-func carProc(args Object) Object {
-	return caar(args)
+func carProc(args Object) (Object, error) {
+	return caar(args), nil
 }
 
-func cdrProc(args Object) Object {
-	return cdar(args)
+func cdrProc(args Object) (Object, error) {
+	return cdar(args), nil
 }
 
-func setcarProc(args Object) Object {
+func setcarProc(args Object) (Object, error) {
 	setCar(car(args), cadr(args))
-	return OK_Symbol
+	return OK_Symbol, nil
 }
 
-func setcdrProc(args Object) Object {
+func setcdrProc(args Object) (Object, error) {
 	setCdr(car(args), cadr(args))
-	return OK_Symbol
+	return OK_Symbol, nil
 }
 
-func listProc(args Object) Object {
-	return args
+func listProc(args Object) (Object, error) {
+	return args, nil
 }
 
 func equal(obj1 Object, obj2 Object) bool {
@@ -241,17 +242,17 @@ func equal(obj1 Object, obj2 Object) bool {
 	}
 }
 
-func eqProc(args Object) Object {
+func eqProc(args Object) (Object, error) {
 	obj1 := car(args)
 	obj2 := cadr(args)
 	if equal(obj1, obj2) {
-		return The_True
+		return The_True, nil
 	} else {
-		return The_False
+		return The_False, nil
 	}
 }
 
-func errorProc(args Object) Object {
+func errorProc(args Object) (Object, error) {
 	fmt.Println("Error:")
 	for {
 		if isEmptyList(args) {
@@ -261,7 +262,7 @@ func errorProc(args Object) Object {
 		args = cdr(args)
 	}
 	os.Exit(1)
-	return nil
+	return nil, nil
 }
 
 func makeEnv() Object {
@@ -303,6 +304,7 @@ func Init() {
 	The_False = makeBoolean(0)
 	Set_Symbol = makeSymbol("set!")
 	OK_Symbol = makeSymbol("ok")
+	FAIL_Symbol = makeSymbol("fail")
 	If_Symbol = makeSymbol("if")
 	Else_Symbol = makeSymbol("else")
 	Let_Symbol = makeSymbol("let")

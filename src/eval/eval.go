@@ -233,8 +233,7 @@ func evalApp(exp Object, env Object) (Object, error) {
 	args := listValues(cdr(exp), env)
 	if isPrimitiveProc(proc) {
 		p := asFunc(proc)
-		val := p(args)
-		return val, nil
+		return p(args)
 	}
 	return nil, errors.New("not implemented")
 }
