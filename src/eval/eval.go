@@ -7,12 +7,20 @@ import (
 	"os"
 )
 
-func isApp(exp Object) bool {
+func isTaggedWith(exp Object, tag Object) bool {
 	if isPair(exp) {
-		return true
-	} else {
-		return false
+		theCar := car(exp)
+		if isSymbol(theCar) && (theCar == tag) {
+			return true
+		} else {
+			return false
+		}
 	}
+	return false
+}
+
+func isApp(exp Object) bool {
+	return isPair(exp)
 }
 
 func isSelfEval(exp Object) bool {
@@ -26,23 +34,7 @@ func isSelfEval(exp Object) bool {
 }
 
 func isVariable(exp Object) bool {
-	if isSymbol(exp) {
-		return true
-	} else {
-		return false
-	}
-}
-
-func isTaggedWith(exp Object, tag Object) bool {
-	if isPair(exp) {
-		theCar := car(exp)
-		if isSymbol(theCar) && (theCar == tag) {
-			return true
-		} else {
-			return false
-		}
-	}
-	return false
+	return isSymbol(exp)
 }
 
 func isQuoted(exp Object) bool {
@@ -54,43 +46,27 @@ func isQuoted(exp Object) bool {
 }
 
 func isAssign(exp Object) bool {
-	if isTaggedWith(exp, Set_Symbol) {
-		return true
-	} else {
-		return false
-	}
+	return isTaggedWith(exp, Set_Symbol)
 }
 
 func isDef(exp Object) bool {
-	if isTaggedWith(exp, Define_Symbol) {
-		return true
-	} else {
-		return false
-	}
+	return isTaggedWith(exp, Define_Symbol)
 }
 
 func isAnd(exp Object) bool {
-	if isTaggedWith(exp, And_Symbol) {
-		return true
-	} else {
-		return false
-	}
+	return isTaggedWith(exp, And_Symbol)
 }
 
 func isOr(exp Object) bool {
-	if isTaggedWith(exp, Or_Symbol) {
-		return true
-	} else {
-		return false
-	}
+	return isTaggedWith(exp, Or_Symbol)
 }
 
 func isCond(exp Object) bool {
-	if isTaggedWith(exp, Cond_Symbol) {
-		return true
-	} else {
-		return false
-	}
+	return isTaggedWith(exp, Cond_Symbol)
+}
+
+func isLet(exp Object) bool {
+	return isTaggedWith(exp, Let_Symbol)
 }
 
 func defVar(exp Object) (Object, error) {
@@ -238,6 +214,62 @@ func evalApp(exp Object, env Object) (Object, error) {
 	return nil, errors.New("not implemented")
 }
 
+func letBindings(exp Object) Object {
+	return cadr(exp)
+}
+
+func letBody(exp Object) Object {
+	return cddr(exp)
+}
+
+func bindingParam(bind Object) Object {
+	return car(bind)
+}
+
+func bindingArgu(bind Object) Object {
+	return cadr(bind)
+}
+
+func bindingParams(binds Object) Object {
+	if isEmptyList(binds) {
+		return The_EmptyList
+	} else {
+		return cons(bindingParam(car(binds)),
+			bindingParams(cdr(binds)))
+	}
+}
+
+func bindingArgus(binds Object) Object {
+	if isEmptyList(binds) {
+		return The_EmptyList
+	} else {
+		return cons(bindingArgu(car(binds)),
+			bindingArgus(cdr(binds)))
+	}
+}
+
+func letParams(exp Object) Object {
+	return bindingParams(letBindings(exp))
+}
+
+func letArgus(exp Object) Object {
+	return bindingArgus(letBindings(exp))
+}
+
+func makeApp(operator Object, operands Object) Object {
+	return cons(operator, operands)
+}
+
+func makeLambda(params Object, body Object) Object {
+	return cons(Lambda_Symbol, cons(params, body))
+}
+
+func evalLet(exp Object, env Object) (Object, error) {
+	obj := makeApp(makeLambda(letParams(exp), letBody(exp)),
+		letArgus(exp))
+	return eval(obj, env)
+}
+
 func eval(exp Object, env Object) (Object, error) {
 	if isSelfEval(exp) {
 		return exp, nil
@@ -259,8 +291,9 @@ func eval(exp Object, env Object) (Object, error) {
 		return evalCond(exp, env)
 	} else if isApp(exp) {
 		return evalApp(exp, env)
+	} else if isLet(exp) {
+		return evalLet(exp, env)
 	}
-
 	return exp, nil
 }
 
