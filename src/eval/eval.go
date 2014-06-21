@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func isTaggedWith(exp Object, tag Object) bool {
+func isTagged(exp Object, tag Object) bool {
 	if isPair(exp) {
 		theCar := car(exp)
 		if isSymbol(theCar) && (theCar == tag) {
@@ -38,7 +38,7 @@ func isVariable(exp Object) bool {
 }
 
 func isQuoted(exp Object) bool {
-	if isTaggedWith(exp, Quote_Symbol) {
+	if isTagged(exp, Quote_Symbol) {
 		return true
 	} else {
 		return false
@@ -46,39 +46,39 @@ func isQuoted(exp Object) bool {
 }
 
 func isAssign(exp Object) bool {
-	return isTaggedWith(exp, Set_Symbol)
+	return isTagged(exp, Set_Symbol)
 }
 
 func isDef(exp Object) bool {
-	return isTaggedWith(exp, Define_Symbol)
+	return isTagged(exp, Define_Symbol)
 }
 
 func isAnd(exp Object) bool {
-	return isTaggedWith(exp, And_Symbol)
+	return isTagged(exp, And_Symbol)
 }
 
 func isOr(exp Object) bool {
-	return isTaggedWith(exp, Or_Symbol)
+	return isTagged(exp, Or_Symbol)
 }
 
 func isIf(exp Object) bool {
-	return isTaggedWith(exp, If_Symbol)
+	return isTagged(exp, If_Symbol)
 }
 
 func isLambda(exp Object) bool {
-	return isTaggedWith(exp, Lambda_Symbol)
+	return isTagged(exp, Lambda_Symbol)
 }
 
 func isCond(exp Object) bool {
-	return isTaggedWith(exp, Cond_Symbol)
+	return isTagged(exp, Cond_Symbol)
 }
 
 func isLet(exp Object) bool {
-	return isTaggedWith(exp, Let_Symbol)
+	return isTagged(exp, Let_Symbol)
 }
 
 func isBegin(exp Object) bool {
-	return isTaggedWith(exp, Begin_Symbol)
+	return isTagged(exp, Begin_Symbol)
 }
 
 func defVar(exp Object) (Object, error) {
@@ -225,10 +225,10 @@ func evalApp(exp Object, env Object) (Object, error) {
 		return p(args)
 	} else if isCompProc(proc) {
 		_env := extendEnv(
-			fieldOf(proc, "Params"),
+			procParams(proc),
 			args,
-			fieldOf(proc, "Env"))
-		return eval(makeBegin(fieldOf(proc, "Body")), _env)
+			procEnv(proc))
+		return eval(makeBegin(procBody(proc)), _env)
 	}
 
 	return nil, errors.New("not implemented")

@@ -124,6 +124,18 @@ func makeCompProc(params Object, body Object, env Object) Object {
 	return &ComProc{COMPOUND_PROC, params, body, env}
 }
 
+func procParams(obj Object) Object {
+	return fieldOf(obj, "Params")
+}
+
+func procEnv(obj Object) Object {
+	return fieldOf(obj, "Env")
+}
+
+func procBody(obj Object) Object {
+	return fieldOf(obj, "Body")
+}
+
 func isSymbol(obj Object) bool {
 	return typeOf(obj) == SYMBOL
 }
