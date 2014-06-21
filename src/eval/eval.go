@@ -124,12 +124,10 @@ func evalDef(exp Object, env Object) (Object, error) {
 	var err error
 	_var, err = defVar(exp)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	_val, err = defVal(exp)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	_val, _ = eval(_val, env)
