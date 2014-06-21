@@ -61,12 +61,24 @@ func isOr(exp Object) bool {
 	return isTaggedWith(exp, Or_Symbol)
 }
 
+func isIf(exp Object) bool {
+	return isTaggedWith(exp, If_Symbol)
+}
+
+func isLambda(exp Object) bool {
+	return isTaggedWith(exp, Lambda_Symbol)
+}
+
 func isCond(exp Object) bool {
 	return isTaggedWith(exp, Cond_Symbol)
 }
 
 func isLet(exp Object) bool {
 	return isTaggedWith(exp, Let_Symbol)
+}
+
+func isBegin(exp Object) bool {
+	return isTaggedWith(exp, Begin_Symbol)
 }
 
 func defVar(exp Object) (Object, error) {
@@ -82,14 +94,6 @@ func defVal(exp Object) (Object, error) {
 		return car(left), nil
 	}
 	return nil, errors.New("defval failed")
-}
-
-func isIf(exp Object) bool {
-	if isTaggedWith(exp, If_Symbol) {
-		return true
-	} else {
-		return false
-	}
 }
 
 func listValues(exp Object, env Object) Object {
@@ -201,6 +205,15 @@ func evalCond(exp Object, env Object) (Object, error) {
 	return The_True, nil
 }
 
+func evalBegin(exp Object, env Object) (Object, error) {
+	exp = cdr(exp)
+	for !isLast(exp) {
+		eval(car(exp), env)
+		exp = cdr(exp)
+	}
+	return eval(car(exp), env)
+}
+
 func evalApp(exp Object, env Object) (Object, error) {
 	proc, err := eval(car(exp), env)
 	if err != nil {
@@ -210,7 +223,14 @@ func evalApp(exp Object, env Object) (Object, error) {
 	if isPrimitiveProc(proc) {
 		p := asFunc(proc)
 		return p(args)
+	} else if isCompProc(proc) {
+		_env := extendEnv(
+			fieldOf(proc, "Params"),
+			args,
+			fieldOf(proc, "Env"))
+		return eval(makeBegin(fieldOf(proc, "Body")), _env)
 	}
+
 	return nil, errors.New("not implemented")
 }
 
@@ -260,14 +280,34 @@ func makeApp(operator Object, operands Object) Object {
 	return cons(operator, operands)
 }
 
+func makeBegin(exp Object) Object {
+	return cons(Begin_Symbol, exp)
+}
+
 func makeLambda(params Object, body Object) Object {
 	return cons(Lambda_Symbol, cons(params, body))
 }
 
 func evalLet(exp Object, env Object) (Object, error) {
-	obj := makeApp(makeLambda(letParams(exp), letBody(exp)),
+	obj := makeApp(
+		makeLambda(letParams(exp), letBody(exp)),
 		letArgus(exp))
 	return eval(obj, env)
+}
+
+func lambdaParams(exp Object) Object {
+	return cadr(exp)
+}
+
+func lambdaBody(exp Object) Object {
+	return cddr(exp)
+}
+
+func evalLambda(exp Object, env Object) (Object, error) {
+	return makeCompProc(
+		lambdaParams(exp),
+		lambdaBody(exp),
+		env), nil
 }
 
 func eval(exp Object, env Object) (Object, error) {
@@ -283,16 +323,22 @@ func eval(exp Object, env Object) (Object, error) {
 		return evalDef(exp, env)
 	} else if isIf(exp) {
 		return evalIf(exp, env)
+	} else if isLambda(exp) {
+		return evalLambda(exp, env)
+	} else if isBegin(exp) {
+		return evalBegin(exp, env)
 	} else if isAnd(exp) {
 		return evalAnd(exp, env)
 	} else if isOr(exp) {
 		return evalOr(exp, env)
 	} else if isCond(exp) {
 		return evalCond(exp, env)
-	} else if isApp(exp) {
-		return evalApp(exp, env)
 	} else if isLet(exp) {
 		return evalLet(exp, env)
+	} else if isApp(exp) {
+		return evalApp(exp, env)
+	} else {
+		//fmt.Println("now:", exp)
 	}
 	return exp, nil
 }

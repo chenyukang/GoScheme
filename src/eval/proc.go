@@ -319,6 +319,7 @@ func Init() {
 	Quote_Symbol = makeSymbol("quote")
 	Lambda_Symbol = makeSymbol("lambda")
 	Cond_Symbol = makeSymbol("cond")
+
 	The_Empty_Env = The_EmptyList
 	The_Global_Env = makeEnv()
 	setupEnv(The_Global_Env)

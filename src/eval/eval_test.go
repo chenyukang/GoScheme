@@ -137,3 +137,17 @@ func TestEvalCond(t *testing.T) {
 		t.Error("cond failed")
 	}
 }
+
+func TestEvalLet(t *testing.T) {
+	res, err := evalWrapper("(+ 1 2)")
+	if !equal(res, makeInt(3)) {
+		t.Error("add failed")
+	}
+	res, err = evalWrapper("(let ((a 1) (b 2)) (+ a b))")
+	if err != nil {
+		t.Error("let failed")
+	}
+	if !equal(res, makeInt(3)) {
+		t.Error("let failed")
+	}
+}
