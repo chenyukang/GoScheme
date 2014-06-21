@@ -38,11 +38,7 @@ func isVariable(exp Object) bool {
 }
 
 func isQuoted(exp Object) bool {
-	if isTagged(exp, Quote_Symbol) {
-		return true
-	} else {
-		return false
-	}
+	return isTagged(exp, Quote_Symbol)
 }
 
 func isAssign(exp Object) bool {
