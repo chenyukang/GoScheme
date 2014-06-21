@@ -180,4 +180,36 @@ func TestIsProc_Family(t *testing.T) {
 	if isTrue(res) == false {
 		t.Error("isSymbolProc error")
 	}
+
+	res, _ = isNullProc(args)
+	if isTrue(res) {
+		t.Error("isNullProc failed")
+	}
+
+	res, _ = isBooleanProc(args)
+	if isTrue(res) {
+		t.Error("isBooleanProc failed")
+	}
+
+	res, _ = isIntegerProc(args)
+	if isTrue(res) {
+		t.Error("isIntegerProc failed")
+	}
+
+	args = cons(makeInt(1), makeInt(2))
+	res, _ = isSymbolProc(args)
+	if isTrue(res) {
+		t.Error("isSymbolProc failed")
+	}
+
+	res, _ = isCharProc(cons(makeChar('a'), makeChar('b')))
+	if isFalse(res) {
+		t.Error("isCharProc failed")
+	}
+
+	res, _ = isCharProc(cons(makeInt(1), makeInt(2)))
+	if isTrue(res) {
+		t.Error("isCharProc failed")
+	}
+
 }
