@@ -70,6 +70,14 @@ type Proc struct {
 	Value ObjFun
 }
 
+// Compound proc
+type ComProc struct {
+	Type   int
+	Params Object
+	Body   Object
+	Env    Object
+}
+
 type EmptyList struct {
 	Type int
 }
@@ -112,6 +120,10 @@ func makePrimitiveProc(fun ObjFun) Object {
 	return &Proc{PRIMITIVE_PROC, fun}
 }
 
+func makeCompProc(params Object, body Object, env Object) Object {
+	return &ComProc{COMPOUND_PROC, params, body, env}
+}
+
 func isSymbol(obj Object) bool {
 	return typeOf(obj) == SYMBOL
 }
@@ -150,6 +162,10 @@ func isPair(obj Object) bool {
 
 func isPrimitiveProc(obj Object) bool {
 	return typeOf(obj) == PRIMITIVE_PROC
+}
+
+func isCompProc(obj Object) bool {
+	return typeOf(obj) == COMPOUND_PROC
 }
 
 func fieldOf(obj Object, field string) Object {
@@ -243,8 +259,7 @@ func firstFrame(env Object) Object {
 }
 
 func lookupVar(avar Object, env Object) (Object, error) {
-	e := env
-	for !isEmptyList(e) {
+	for !isEmptyList(env) {
 		frame := firstFrame(env)
 		vars := frameVars(frame)
 		vals := frameVals(frame)
@@ -255,7 +270,7 @@ func lookupVar(avar Object, env Object) (Object, error) {
 			vars = cdr(vars)
 			vals = cdr(vals)
 		}
-		e = cdr(e)
+		env = cdr(env)
 	}
 	return nil, errors.New("undef variable")
 }
