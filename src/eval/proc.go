@@ -213,6 +213,12 @@ func listProc(args Object) (Object, error) {
 	return args, nil
 }
 
+func loadProc(args Object) (Object, error) {
+	filename := asStr(car(args))
+	fmt.Println("file:", filename)
+	return OK_Symbol, nil
+}
+
 func equal(obj1 Object, obj2 Object) bool {
 	type1, type2 := typeOf(obj1), typeOf(obj2)
 	if type1 != type2 {
@@ -297,6 +303,7 @@ func setupEnv(env Object) {
 	addProcedure("set-cdr!", setcdrProc, env)
 
 	addProcedure("list", listProc, env)
+	addProcedure("load", loadProc, env)
 	addProcedure("error", errorProc, env)
 
 }
