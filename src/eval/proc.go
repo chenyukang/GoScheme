@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -215,8 +216,24 @@ func listProc(args Object) (Object, error) {
 
 func loadProc(args Object) (Object, error) {
 	filename := asStr(car(args))
-	fmt.Println("file:", filename)
-	return OK_Symbol, nil
+	fp, err := os.Open(filename)
+	defer fp.Close()
+	if err != nil {
+		return nil, err
+	}
+	reader := bufio.NewReader(fp)
+	var res Object
+	for {
+		obj := read(reader)
+		if obj == nil {
+			break
+		}
+		res, err = eval(obj, The_Global_Env)
+		if err != nil {
+			break
+		}
+	}
+	return res, nil
 }
 
 func equal(obj1 Object, obj2 Object) bool {
