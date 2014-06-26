@@ -231,9 +231,12 @@ func loadProc(args Object) (Object, error) {
 		res, err = eval(obj, The_Global_Env)
 		if err != nil {
 			break
+		} else {
+			write(res)
+			fmt.Println()
 		}
 	}
-	return res, nil
+	return OK_Symbol, nil
 }
 
 func equal(obj1 Object, obj2 Object) bool {
