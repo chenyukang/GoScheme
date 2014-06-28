@@ -336,15 +336,18 @@ func eval(exp Object, env Object) (Object, error) {
 	} else if isApp(exp) {
 		return evalApp(exp, env)
 	} else {
-		//fmt.Println("now:", exp)
+		return exp, nil
 	}
-	return exp, nil
 }
 
-func Run(reader *bufio.Reader) {
-	fmt.Printf("Welcome to Bootstrap Scheme.\nUse ctrl-c to exit.\n")
+func Run(reader *bufio.Reader, iteractive bool) {
+	if iteractive {
+		fmt.Printf("Welcome to Bootstrap Scheme.\nUse ctrl-c to exit.\n")
+	}
 	for {
-		fmt.Printf("> ")
+		if iteractive {
+			fmt.Printf("> ")
+		}
 		exp := read(reader)
 		if exp == nil {
 			break

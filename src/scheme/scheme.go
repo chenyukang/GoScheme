@@ -34,5 +34,9 @@ func main() {
 	eval.Init()
 
 	reader := bufio.NewReader(file)
-	eval.Run(reader)
+	iteractive := true
+	if file != os.Stdin {
+		iteractive = false
+	}
+	eval.Run(reader, iteractive)
 }

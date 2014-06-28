@@ -186,7 +186,6 @@ func read(reader *bufio.Reader) Object {
 				break
 			}
 			buf += string(n)
-
 		}
 		if isDelimiter(n) {
 			ungetc(reader)
