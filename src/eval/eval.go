@@ -80,16 +80,20 @@ func isBegin(exp Object) bool {
 func defVar(exp Object) (Object, error) {
 	if isSymbol(cadr(exp)) {
 		return cadr(exp), nil
+	} else {
+		//proc
+		return caadr(exp), nil
 	}
-	return nil, errors.New("defvar target is not symbol")
 }
 
 func defVal(exp Object) (Object, error) {
 	if isSymbol(cadr(exp)) {
 		left := cdr(cdr(exp))
 		return car(left), nil
+	} else {
+		//proc
+		return makeLambda(cdadr(exp), cddr(exp)), nil
 	}
-	return nil, errors.New("defval failed")
 }
 
 func listValues(exp Object, env Object) Object {

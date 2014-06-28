@@ -176,6 +176,14 @@ func cadr(obj Object) Object {
 	return car(cdr(obj))
 }
 
+func caadr(obj Object) Object {
+	return car(cadr(obj))
+}
+
+func cdadr(obj Object) Object {
+	return cdr(cadr(obj))
+}
+
 func cddr(obj Object) Object {
 	return cdr(cdr(obj))
 }
