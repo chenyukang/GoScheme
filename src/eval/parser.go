@@ -1,10 +1,6 @@
 package eval
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-)
+import "bufio"
 
 func ungetc(reader *bufio.Reader) {
 	err := reader.UnreadByte()
@@ -197,60 +193,4 @@ func read(reader *bufio.Reader) Object {
 		return readPair(reader)
 	}
 	return nil
-}
-
-func writePair(obj Object) {
-	carObj := car(obj)
-	cdrObj := cdr(obj)
-	write(carObj)
-	if typeOf(cdrObj) == PAIR {
-		fmt.Fprintf(os.Stderr, " ")
-		writePair(cdrObj)
-	} else if typeOf(cdrObj) == EMPTY_LIST {
-		return
-	} else {
-		fmt.Fprintf(os.Stderr, " . ")
-		write(cdrObj)
-	}
-}
-
-func write(obj Object) {
-	_type := typeOf(obj)
-	switch _type {
-	case BOOLEAN:
-		if isFalse(obj) {
-			fmt.Fprintf(os.Stderr, "#f")
-		} else {
-			fmt.Fprintf(os.Stderr, "#t")
-		}
-	case EMPTY_LIST:
-		fmt.Fprintf(os.Stderr, "()")
-	case SYMBOL:
-		fmt.Fprintf(os.Stderr, "%s", asSym(obj))
-	case CHARACTER:
-		c := asChar(obj)
-		fmt.Fprintf(os.Stderr, "#\\")
-		switch c {
-		case '\n':
-			fmt.Fprintf(os.Stderr, "newline")
-		case ' ':
-			fmt.Fprintf(os.Stderr, "space")
-		default:
-			fmt.Fprintf(os.Stderr, "%c", c)
-		}
-	case INT:
-		fmt.Fprintf(os.Stderr, "%d", asInt(obj))
-	case STRING:
-		fmt.Fprintf(os.Stderr, "\"%s\"", asStr(obj))
-	case PAIR:
-		fmt.Fprintf(os.Stderr, "(")
-		writePair(obj)
-		fmt.Fprintf(os.Stderr, ")")
-	case PRIMITIVE_PROC:
-		fmt.Fprintf(os.Stderr, "#<primitive-procedure>")
-	case COMPOUND_PROC:
-		fmt.Fprintf(os.Stderr, "#<compound-proc>")
-	default:
-		fmt.Println(obj)
-	}
 }
